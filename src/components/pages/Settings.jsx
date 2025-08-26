@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
@@ -40,11 +41,16 @@ import {
   Plus,
   X,
   ChevronRight,
+  ChevronLeft,
   HelpCircle
 } from 'lucide-react';
 
 const Settings = () => {
+  const { t, i18n } = useTranslation();
   const { customers, units, contracts, payments } = useAppContext();
+  
+  // Get current language
+  const currentLang = i18n.language;
   
   const [activeSection, setActiveSection] = useState('profile');
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -162,14 +168,14 @@ const Settings = () => {
 
   // Settings sections
   const settingsSections = [
-    { id: 'profile', label: 'Profile', icon: User, description: 'Personal information and preferences' },
-    { id: 'business', label: 'Business', icon: Building, description: 'Company details and information' },
-    { id: 'system', label: 'System', icon: SettingsIcon, description: 'General system configuration' },
-    { id: 'pricing', label: 'Pricing', icon: DollarSign, description: 'Fees, deposits, and pricing rules' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alert preferences and settings' },
-    { id: 'security', label: 'Security', icon: Shield, description: 'Security and access control' },
-    { id: 'appearance', label: 'Appearance', icon: Palette, description: 'Theme and display preferences' },
-    { id: 'integrations', label: 'Integrations', icon: Globe, description: 'External services and APIs' }
+    { id: 'profile', label: t('settings.profile'), icon: User, description: t('settings.profileDescription') },
+    { id: 'business', label: t('settings.business'), icon: Building, description: t('settings.businessDescription') },
+    { id: 'system', label: t('settings.system'), icon: SettingsIcon, description: t('settings.systemDescription') },
+    { id: 'pricing', label: t('settings.pricing'), icon: DollarSign, description: t('settings.pricingDescription') },
+    { id: 'notifications', label: t('settings.notifications'), icon: Bell, description: t('settings.notificationsDescription') },
+    { id: 'security', label: t('settings.security'), icon: Shield, description: t('settings.securityDescription') },
+    { id: 'appearance', label: t('settings.appearance'), icon: Palette, description: t('settings.appearanceDescription') },
+    { id: 'integrations', label: t('settings.integrations'), icon: Globe, description: t('settings.integrationsDescription') }
   ];
 
   // Check for unsaved changes
@@ -187,6 +193,14 @@ const Settings = () => {
         [field]: value
       }
     }));
+  };
+
+  // Handle language change
+  const handleLanguageChange = (newLanguage) => {
+    handleInputChange('profile', 'language', newLanguage);
+    // Change the actual app language
+    const langCode = newLanguage.split('-')[0]; // Convert 'en-US' to 'en', 'he-IL' to 'he'
+    i18n.changeLanguage(langCode);
   };
 
   // Handle nested input changes
@@ -208,12 +222,12 @@ const Settings = () => {
     console.log('Saving settings:', settings);
     setOriginalSettings(settings);
     // In a real app, this would save to backend
-    alert('Settings saved successfully!');
+    alert(t('settings.settingsSavedSuccessfully'));
   };
 
   // Reset settings
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to reset all settings to default values?')) {
+    if (window.confirm(t('settings.confirmResetSettings'))) {
       setSettings(originalSettings);
     }
   };
@@ -240,9 +254,9 @@ const Settings = () => {
         try {
           const importedSettings = JSON.parse(e.target.result);
           setSettings(importedSettings);
-          alert('Settings imported successfully!');
+          alert(t('settings.settingsImportedSuccessfully'));
         } catch (error) {
-          alert('Error importing settings. Please check the file format.');
+          alert(t('settings.errorImportingSettings'));
         }
       };
       reader.readAsText(file);
@@ -254,7 +268,7 @@ const Settings = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
+          <CardTitle>{t('settings.personalInfo')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-4">
@@ -264,7 +278,7 @@ const Settings = () => {
             <div>
               <Button variant="outline" size="sm">
                 <Camera className="w-4 h-4 mr-2" />
-                Change Avatar
+{t('settings.changeAvatar')}
               </Button>
               <p className="text-sm text-gray-500 mt-1">JPG, PNG up to 2MB</p>
             </div>
@@ -272,7 +286,7 @@ const Settings = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.firstName')}</label>
               <input
                 type="text"
                 value={settings.profile.firstName}
@@ -281,7 +295,7 @@ const Settings = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.lastName')}</label>
               <input
                 type="text"
                 value={settings.profile.lastName}
@@ -292,7 +306,7 @@ const Settings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.email')}</label>
             <input
               type="email"
               value={settings.profile.email}
@@ -302,7 +316,7 @@ const Settings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.phone')}</label>
             <input
               type="tel"
               value={settings.profile.phone}
@@ -312,7 +326,7 @@ const Settings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.jobTitle')}</label>
             <input
               type="text"
               value={settings.profile.title}
@@ -323,7 +337,7 @@ const Settings = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.timezone')}</label>
               <select
                 value={settings.profile.timezone}
                 onChange={(e) => handleInputChange('profile', 'timezone', e.target.value)}
@@ -333,16 +347,18 @@ const Settings = () => {
                 <option value="America/Chicago">Central Time (CST)</option>
                 <option value="America/Denver">Mountain Time (MST)</option>
                 <option value="America/Los_Angeles">Pacific Time (PST)</option>
+                <option value="Asia/Jerusalem">Israel Time (IST)</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.language')}</label>
               <select
                 value={settings.profile.language}
-                onChange={(e) => handleInputChange('profile', 'language', e.target.value)}
+                onChange={(e) => handleLanguageChange(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="en-US">English (US)</option>
+                <option value="he-IL">עברית (Hebrew)</option>
                 <option value="es-ES">Español</option>
                 <option value="fr-FR">Français</option>
               </select>
@@ -353,7 +369,7 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Security</CardTitle>
+          <CardTitle>{t('settings.security')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Button
@@ -361,7 +377,7 @@ const Settings = () => {
             onClick={() => setShowPasswordChange(true)}
           >
             <Key className="w-4 h-4 mr-2" />
-            Change Password
+{t('settings.changePassword')}
           </Button>
         </CardContent>
       </Card>
@@ -372,11 +388,11 @@ const Settings = () => {
   const renderBusinessSection = () => (
     <Card>
       <CardHeader>
-        <CardTitle>Business Information</CardTitle>
+        <CardTitle>{t('settings.businessInfo')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.companyName')}</label>
           <input
             type="text"
             value={settings.business.companyName}
@@ -386,7 +402,7 @@ const Settings = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Business Type</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.businessType')}</label>
           <select
             value={settings.business.businessType}
             onChange={(e) => handleInputChange('business', 'businessType', e.target.value)}
@@ -401,7 +417,7 @@ const Settings = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.phone')}</label>
             <input
               type="tel"
               value={settings.business.phone}
@@ -410,7 +426,7 @@ const Settings = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.email')}</label>
             <input
               type="email"
               value={settings.business.email}
@@ -421,7 +437,7 @@ const Settings = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.address')}</label>
           <input
             type="text"
             value={settings.business.address}
@@ -432,7 +448,7 @@ const Settings = () => {
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.city')}</label>
             <input
               type="text"
               value={settings.business.city}
@@ -441,7 +457,7 @@ const Settings = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.state')}</label>
             <input
               type="text"
               value={settings.business.state}
@@ -450,7 +466,7 @@ const Settings = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.zipCode')}</label>
             <input
               type="text"
               value={settings.business.zipCode}
@@ -462,7 +478,7 @@ const Settings = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.website')}</label>
             <input
               type="url"
               value={settings.business.website}
@@ -471,7 +487,7 @@ const Settings = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.taxId')}</label>
             <input
               type="text"
               value={settings.business.taxId}
@@ -489,19 +505,19 @@ const Settings = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Late Fees</CardTitle>
+          <CardTitle>{t('settings.lateFees')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Late Fee Type</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.lateFeeType')}</label>
               <select
                 value={settings.pricing.lateFeeType}
                 onChange={(e) => handleInputChange('pricing', 'lateFeeType', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="flat">Flat Fee</option>
-                <option value="percentage">Percentage</option>
+                <option value="flat">{t('settings.flatFee')}</option>
+                <option value="percentage">{t('settings.percentage')}</option>
               </select>
             </div>
             <div>
@@ -520,7 +536,7 @@ const Settings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Grace Period (days)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.gracePeriod')}</label>
             <input
               type="number"
               value={settings.pricing.lateFeeGracePeriod}
@@ -534,7 +550,7 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Security Deposits</CardTitle>
+          <CardTitle>{t('settings.securityDeposit')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -544,20 +560,20 @@ const Settings = () => {
               onChange={(e) => handleInputChange('pricing', 'securityDepositRequired', e.target.checked)}
               className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
             />
-            <label className="text-sm font-medium text-gray-700">Require Security Deposit</label>
+            <label className="text-sm font-medium text-gray-700">{t('settings.requireSecurityDeposit')}</label>
           </div>
 
           {settings.pricing.securityDepositRequired && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Deposit Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.depositType')}</label>
                 <select
                   value={settings.pricing.defaultSecurityDeposit}
                   onChange={(e) => handleInputChange('pricing', 'defaultSecurityDeposit', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
-                  <option value="monthly_rate">Equal to Monthly Rate</option>
-                  <option value="fixed">Fixed Amount</option>
+                  <option value="monthly_rate">{t('settings.equalToMonthlyRate')}</option>
+                  <option value="fixed">{t('settings.fixedAmount')}</option>
                 </select>
               </div>
               {settings.pricing.defaultSecurityDeposit === 'fixed' && (
@@ -579,12 +595,12 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tax Settings</CardTitle>
+          <CardTitle>{t('settings.taxSettings')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tax Rate (%)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.taxRate')}</label>
               <input
                 type="number"
                 value={settings.pricing.taxRate}
@@ -602,7 +618,7 @@ const Settings = () => {
                 onChange={(e) => handleInputChange('pricing', 'taxIncluded', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <label className="ml-2 text-sm font-medium text-gray-700">Tax Included in Price</label>
+              <label className="ml-2 text-sm font-medium text-gray-700">{t('settings.taxIncluded')}</label>
             </div>
           </div>
         </CardContent>
@@ -623,25 +639,26 @@ const Settings = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>System Configuration</CardTitle>
+              <CardTitle>{t('settings.systemConfiguration')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Currency</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.currency')}</label>
                   <select
                     value={settings.system.defaultCurrency}
                     onChange={(e) => handleInputChange('system', 'defaultCurrency', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="USD">US Dollar (USD)</option>
+                    <option value="ILS">Israeli Shekel (ILS - ₪)</option>
                     <option value="EUR">Euro (EUR)</option>
                     <option value="GBP">British Pound (GBP)</option>
                     <option value="CAD">Canadian Dollar (CAD)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Format</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.dateFormat')}</label>
                   <select
                     value={settings.system.dateFormat}
                     onChange={(e) => handleInputChange('system', 'dateFormat', e.target.value)}
@@ -662,7 +679,7 @@ const Settings = () => {
                     onChange={(e) => handleInputChange('system', 'autoBackup', e.target.checked)}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <label className="text-sm font-medium text-gray-700">Enable Automatic Backups</label>
+                  <label className="text-sm font-medium text-gray-700">{t('settings.autoBackup')}</label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -672,7 +689,7 @@ const Settings = () => {
                     onChange={(e) => handleInputChange('system', 'maintenanceMode', e.target.checked)}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <label className="text-sm font-medium text-gray-700">Maintenance Mode</label>
+                  <label className="text-sm font-medium text-gray-700">{t('settings.maintenanceMode')}</label>
                 </div>
               </div>
             </CardContent>
@@ -682,16 +699,16 @@ const Settings = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Appearance & Theme</CardTitle>
+              <CardTitle>{t('settings.appearanceAndTheme')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('settings.theme')}</label>
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { value: 'light', label: 'Light', icon: Sun },
-                    { value: 'dark', label: 'Dark', icon: Moon },
-                    { value: 'system', label: 'System', icon: Monitor }
+                    { value: 'light', label: t('settings.light'), icon: Sun },
+                    { value: 'dark', label: t('settings.dark'), icon: Moon },
+                    { value: 'system', label: t('settings.system'), icon: Monitor }
                   ].map(theme => {
                     const Icon = theme.icon;
                     return (
@@ -713,7 +730,7 @@ const Settings = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Primary Color</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.primaryColor')}</label>
                 <input
                   type="color"
                   value={settings.appearance.primaryColor}
@@ -730,7 +747,7 @@ const Settings = () => {
                     onChange={(e) => handleInputChange('appearance', 'showAnimations', e.target.checked)}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <label className="text-sm font-medium text-gray-700">Enable Animations</label>
+                  <label className="text-sm font-medium text-gray-700">{t('settings.animations')}</label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -740,7 +757,7 @@ const Settings = () => {
                     onChange={(e) => handleInputChange('appearance', 'compactMode', e.target.checked)}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <label className="text-sm font-medium text-gray-700">Compact Mode</label>
+                  <label className="text-sm font-medium text-gray-700">{t('settings.compactMode')}</label>
                 </div>
               </div>
             </CardContent>
@@ -755,8 +772,8 @@ const Settings = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold gradient-text mb-2">Settings</h1>
-        <p className="text-gray-600">Configure your storage management system</p>
+        <h1 className="text-4xl font-bold gradient-text mb-2">{t('settings.title')}</h1>
+        <p className="text-gray-600">{t('settings.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-12 gap-8">
@@ -782,7 +799,7 @@ const Settings = () => {
                         <p className="font-medium">{section.label}</p>
                         <p className="text-xs text-gray-500">{section.description}</p>
                       </div>
-                      <ChevronRight className="w-4 h-4" />
+                      {currentLang === 'he' ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
                   );
                 })}
@@ -807,7 +824,7 @@ const Settings = () => {
             <div className="flex items-center space-x-4">
               <Button variant="outline" onClick={handleExport}>
                 <Download className="w-4 h-4 mr-2" />
-                Export Settings
+{t('settings.exportSettings')}
               </Button>
               <div>
                 <input
@@ -820,13 +837,13 @@ const Settings = () => {
                 <label htmlFor="import-settings">
                   <Button variant="outline" as="span">
                     <Upload className="w-4 h-4 mr-2" />
-                    Import Settings
+{t('settings.importSettings')}
                   </Button>
                 </label>
               </div>
               <Button variant="outline" onClick={handleReset}>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Reset
+{t('common.reset')}
               </Button>
             </div>
 
@@ -834,12 +851,12 @@ const Settings = () => {
               {showUnsavedChanges && (
                 <div className="flex items-center text-amber-600">
                   <AlertCircle className="w-4 h-4 mr-2" />
-                  <span className="text-sm">Unsaved changes</span>
+                  <span className="text-sm">{t('settings.unsavedChanges')}</span>
                 </div>
               )}
               <Button variant="gradient" onClick={handleSave}>
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+{t('settings.saveChanges')}
               </Button>
             </div>
           </div>

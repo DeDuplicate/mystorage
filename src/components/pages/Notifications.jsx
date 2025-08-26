@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { formatCurrency } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
@@ -39,6 +41,7 @@ import {
 } from 'lucide-react';
 
 const Notifications = () => {
+  const { t } = useTranslation();
   const {
     customers,
     units,
@@ -66,18 +69,18 @@ const Notifications = () => {
 
   // Notification categories and priorities
   const notificationCategories = {
-    contract: { label: 'Contracts', icon: FileText, color: 'blue' },
-    payment: { label: 'Payments', icon: DollarSign, color: 'green' },
-    maintenance: { label: 'Maintenance', icon: Home, color: 'orange' },
-    customer: { label: 'Customers', icon: User, color: 'purple' },
-    system: { label: 'System', icon: Zap, color: 'gray' },
-    document: { label: 'Documents', icon: FileText, color: 'indigo' }
+    contract: { label: t('navigation.contracts'), icon: FileText, color: 'blue' },
+    payment: { label: t('navigation.payments'), icon: DollarSign, color: 'green' },
+    maintenance: { label: t('units.maintenance'), icon: Home, color: 'orange' },
+    customer: { label: t('navigation.customers'), icon: User, color: 'purple' },
+    system: { label: t('settings.system'), icon: Zap, color: 'gray' },
+    document: { label: t('navigation.documents'), icon: FileText, color: 'indigo' }
   };
 
   const priorityLevels = {
-    high: { label: 'High', color: 'red', icon: AlertTriangle },
-    medium: { label: 'Medium', color: 'yellow', icon: AlertCircle },
-    low: { label: 'Low', color: 'blue', icon: Info }
+    high: { label: t('notifications.high'), color: 'red', icon: AlertTriangle },
+    medium: { label: t('notifications.medium'), color: 'yellow', icon: AlertCircle },
+    low: { label: t('notifications.low'), color: 'blue', icon: Info }
   };
 
   // Generate automated notifications
@@ -102,14 +105,18 @@ const Notifications = () => {
             id: notificationId++,
             category: 'contract',
             priority: daysUntilExpiry <= 7 ? 'high' : 'medium',
-            title: 'Contract Expiring Soon',
-            message: `Contract ${contract.contract_number} for ${contract.customer_name} expires in ${daysUntilExpiry} days`,
+            title: t('notifications.contractExpiry'),
+            message: t('notifications.contractExpiringMessage', { 
+              contractNumber: contract.contract_number, 
+              customerName: contract.customer_name, 
+              days: daysUntilExpiry 
+            }),
             timestamp: new Date().toISOString(),
             read: false,
             actionRequired: true,
             relatedId: contract.id,
             relatedType: 'contract',
-            actions: ['Renew Contract', 'Contact Customer', 'Mark as Handled']
+            actions: [t('notifications.renewContract'), t('notifications.contactCustomer'), t('notifications.markAsHandled')]
           });
         });
       }
@@ -129,14 +136,18 @@ const Notifications = () => {
             id: notificationId++,
             category: 'payment',
             priority: daysUntilDue <= 2 ? 'high' : 'medium',
-            title: 'Payment Due Soon',
-            message: `Payment of $${payment.amount} from ${payment.customer} is due in ${daysUntilDue} days`,
+            title: t('notifications.paymentDue'),
+            message: t('notifications.paymentDueMessage', { 
+              amount: formatCurrency(payment.amount), 
+              customer: payment.customer, 
+              days: daysUntilDue 
+            }),
             timestamp: new Date().toISOString(),
             read: false,
             actionRequired: true,
             relatedId: payment.id,
             relatedType: 'payment',
-            actions: ['Send Reminder', 'Process Payment', 'Mark as Handled']
+            actions: [t('notifications.sendReminder'), t('notifications.processPayment'), t('notifications.markAsHandled')]
           });
         });
       }
@@ -150,14 +161,18 @@ const Notifications = () => {
             id: notificationId++,
             category: 'payment',
             priority: 'high',
-            title: 'Overdue Payment',
-            message: `Payment of $${payment.amount} from ${payment.customer} is ${payment.daysOverdue || 1} days overdue`,
+            title: t('notifications.paymentOverdue'),
+            message: t('notifications.paymentOverdueMessage', { 
+              amount: formatCurrency(payment.amount), 
+              customer: payment.customer, 
+              days: payment.daysOverdue || 1 
+            }),
             timestamp: new Date().toISOString(),
             read: false,
             actionRequired: true,
             relatedId: payment.id,
             relatedType: 'payment',
-            actions: ['Contact Customer', 'Send Final Notice', 'Start Collection Process']
+            actions: [t('notifications.contactCustomer'), t('notifications.sendFinalNotice'), t('notifications.startCollectionProcess')]
           });
         });
       }
@@ -171,14 +186,17 @@ const Notifications = () => {
             id: notificationId++,
             category: 'maintenance',
             priority: 'medium',
-            title: 'Unit Under Maintenance',
-            message: `Unit ${unit.unit_number} is currently under maintenance: ${unit.notes}`,
+            title: t('notifications.maintenanceReminder'),
+            message: t('notifications.unitMaintenanceMessage', { 
+              unitNumber: unit.unit_number, 
+              notes: unit.notes 
+            }),
             timestamp: new Date().toISOString(),
             read: false,
             actionRequired: true,
             relatedId: unit.id,
             relatedType: 'unit',
-            actions: ['Check Progress', 'Mark Complete', 'Schedule Inspection']
+            actions: [t('notifications.checkProgress'), t('notifications.markComplete'), t('notifications.scheduleInspection')]
           });
         });
       }
@@ -198,14 +216,18 @@ const Notifications = () => {
             id: notificationId++,
             category: 'document',
             priority: daysUntilExpiry <= 7 ? 'high' : 'medium',
-            title: 'Document Expiring',
-            message: `${doc.name} for ${doc.customer_name} expires in ${daysUntilExpiry} days`,
+            title: t('notifications.documentExpiry'),
+            message: t('notifications.documentExpiringMessage', { 
+              documentName: doc.name, 
+              customerName: doc.customer_name, 
+              days: daysUntilExpiry 
+            }),
             timestamp: new Date().toISOString(),
             read: false,
             actionRequired: true,
             relatedId: doc.id,
             relatedType: 'document',
-            actions: ['Request Update', 'Contact Customer', 'Mark as Handled']
+            actions: [t('notifications.requestUpdate'), t('notifications.contactCustomer'), t('notifications.markAsHandled')]
           });
         });
       }
@@ -221,14 +243,18 @@ const Notifications = () => {
             id: notificationId++,
             category: 'system',
             priority: 'medium',
-            title: 'Low Occupancy Alert',
-            message: `Current occupancy rate is ${occupancyRate.toFixed(1)}% (${occupiedUnits}/${totalUnits} units)`,
+            title: t('notifications.lowOccupancy'),
+            message: t('notifications.lowOccupancyMessage', { 
+              rate: occupancyRate.toFixed(1), 
+              occupied: occupiedUnits, 
+              total: totalUnits 
+            }),
             timestamp: new Date().toISOString(),
             read: false,
             actionRequired: false,
             relatedId: null,
             relatedType: 'system',
-            actions: ['Review Marketing', 'Adjust Pricing', 'Dismiss']
+            actions: [t('notifications.reviewMarketing'), t('notifications.adjustPricing'), t('notifications.dismiss')]
           });
         }
       }
@@ -239,28 +265,28 @@ const Notifications = () => {
           id: notificationId++,
           category: 'system',
           priority: 'low',
-          title: 'System Backup Complete',
-          message: 'Daily system backup completed successfully',
+          title: t('notifications.systemBackupComplete'),
+          message: t('notifications.systemBackupMessage'),
           timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
           read: true,
           actionRequired: false,
           relatedId: null,
           relatedType: 'system',
-          actions: ['View Report']
+          actions: [t('notifications.viewReport')]
         });
 
         generatedNotifications.push({
           id: notificationId++,
           category: 'customer',
           priority: 'low',
-          title: 'New Customer Inquiry',
-          message: 'New customer inquiry received via website contact form',
+          title: t('notifications.newCustomer'),
+          message: t('notifications.newCustomerInquiryMessage'),
           timestamp: new Date(now.getTime() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
           read: false,
           actionRequired: true,
           relatedId: null,
           relatedType: 'customer',
-          actions: ['View Inquiry', 'Contact Customer', 'Assign Agent']
+          actions: [t('notifications.viewInquiry'), t('notifications.contactCustomer'), t('notifications.assignAgent')]
         });
       }
 
@@ -339,9 +365,9 @@ const Notifications = () => {
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
 
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    if (diffInMinutes < 1) return t('notifications.justNow');
+    if (diffInMinutes < 60) return t('notifications.minutesAgo', { count: diffInMinutes });
+    if (diffInMinutes < 1440) return t('notifications.hoursAgo', { count: Math.floor(diffInMinutes / 60) });
     return date.toLocaleDateString();
   };
 
@@ -349,8 +375,8 @@ const Notifications = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold gradient-text mb-2">Notifications</h1>
-        <p className="text-gray-600">Stay informed about important updates and alerts</p>
+        <h1 className="text-4xl font-bold gradient-text mb-2">{t('notifications.title')}</h1>
+        <p className="text-gray-600">{t('notifications.subtitle')}</p>
       </div>
 
       {/* Statistics */}
@@ -358,37 +384,37 @@ const Notifications = () => {
         <Card className="text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
           <Bell className="w-8 h-8 mx-auto mb-2 text-blue-500" />
           <p className="text-2xl font-bold text-blue-900">{stats.total}</p>
-          <p className="text-xs text-blue-600">Total</p>
+          <p className="text-xs text-blue-600">{t('common.all')}</p>
         </Card>
 
         <Card className="text-center bg-gradient-to-br from-orange-50 to-red-50 border-orange-200">
           <BellRing className="w-8 h-8 mx-auto mb-2 text-orange-500" />
           <p className="text-2xl font-bold text-orange-900">{stats.unread}</p>
-          <p className="text-xs text-orange-600">Unread</p>
+          <p className="text-xs text-orange-600">{t('notifications.unread')}</p>
         </Card>
 
         <Card className="text-center bg-gradient-to-br from-red-50 to-pink-50 border-red-200">
           <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-red-500" />
           <p className="text-2xl font-bold text-red-900">{stats.high}</p>
-          <p className="text-xs text-red-600">High Priority</p>
+          <p className="text-xs text-red-600">{t('notifications.highPriority')}</p>
         </Card>
 
         <Card className="text-center bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
           <Zap className="w-8 h-8 mx-auto mb-2 text-purple-500" />
           <p className="text-2xl font-bold text-purple-900">{stats.actionRequired}</p>
-          <p className="text-xs text-purple-600">Action Required</p>
+          <p className="text-xs text-purple-600">{t('notifications.actionRequired')}</p>
         </Card>
 
         <Card className="text-center bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
           <FileText className="w-8 h-8 mx-auto mb-2 text-green-500" />
           <p className="text-2xl font-bold text-green-900">{stats.byCategory.contract || 0}</p>
-          <p className="text-xs text-green-600">Contracts</p>
+          <p className="text-xs text-green-600">{t('navigation.contracts')}</p>
         </Card>
 
         <Card className="text-center bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200">
           <DollarSign className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
           <p className="text-2xl font-bold text-yellow-900">{stats.byCategory.payment || 0}</p>
-          <p className="text-xs text-yellow-600">Payments</p>
+          <p className="text-xs text-yellow-600">{t('navigation.payments')}</p>
         </Card>
       </div>
 
@@ -400,7 +426,7 @@ const Notifications = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search notifications..."
+              placeholder={t('notifications.searchNotifications')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-64 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -413,7 +439,7 @@ const Notifications = () => {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Categories</option>
+            <option value="all">{t('notifications.allNotifications')}</option>
             {Object.entries(notificationCategories).map(([key, category]) => (
               <option key={key} value={key}>
                 {category.label}
@@ -427,10 +453,10 @@ const Notifications = () => {
             onChange={(e) => setSelectedPriority(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Priorities</option>
+            <option value="all">{t('notifications.allPriorities')}</option>
             {Object.entries(priorityLevels).map(([key, priority]) => (
               <option key={key} value={key}>
-                {priority.label} Priority
+{t('notifications.priorityLevel', { level: priority.label })}
               </option>
             ))}
           </select>
@@ -444,21 +470,21 @@ const Notifications = () => {
             disabled={stats.unread === 0}
           >
             <CheckCircle className="w-4 h-4 mr-2" />
-            Mark All Read
+{t('notifications.markAllAsRead')}
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowSettings(true)}
           >
             <Settings className="w-4 h-4 mr-2" />
-            Settings
+{t('common.settings')}
           </Button>
           <Button
             variant="outline"
             onClick={() => window.location.reload()}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+{t('common.refresh')}
           </Button>
         </div>
       </div>
@@ -468,11 +494,11 @@ const Notifications = () => {
         {filteredNotifications.length === 0 ? (
           <Card className="text-center py-12">
             <BellOff className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Notifications Found</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('notifications.noNotifications')}</h3>
             <p className="text-gray-500">
               {notifications.length === 0 
-                ? "You're all caught up! No new notifications."
-                : "No notifications match your current filters."}
+                ? t('notifications.allCaughtUp')
+                : t('notifications.noMatchingNotifications')}
             </p>
           </Card>
         ) : (
@@ -515,7 +541,7 @@ const Notifications = () => {
                             {notification.actionRequired && (
                               <Badge variant="warning">
                                 <Zap className="w-3 h-3 mr-1" />
-                                Action Required
+                                {t('notifications.actionRequired')}
                               </Badge>
                             )}
                           </div>
@@ -552,7 +578,7 @@ const Notifications = () => {
                                   onClick={() => markAsRead(notification.id)}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
-                                  Mark as Read
+                                  {t('notifications.markAsRead')}
                                 </Button>
                               )}
                               <Button
@@ -594,7 +620,7 @@ const Notifications = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Notification Settings</h2>
+                <h2 className="text-2xl font-bold">{t('notifications.notificationSettings')}</h2>
                 <button
                   onClick={() => setShowSettings(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -630,7 +656,7 @@ const Notifications = () => {
                           {setting.days && (
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Alert {setting.days} days before
+                                {t('notifications.alertDaysBefore', { days: setting.days })}
                               </label>
                               <input
                                 type="number"
@@ -649,7 +675,7 @@ const Notifications = () => {
                           {setting.threshold && (
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Alert when below {setting.threshold}%
+                                {t('notifications.alertBelowThreshold', { threshold: setting.threshold })}
                               </label>
                               <input
                                 type="number"
@@ -667,7 +693,7 @@ const Notifications = () => {
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Notification Methods
+                              {t('notifications.notificationMethods')}
                             </label>
                             <div className="flex flex-wrap gap-2">
                               {['email', 'sms', 'app'].map(method => (
@@ -702,13 +728,13 @@ const Notifications = () => {
                     variant="secondary"
                     onClick={() => setShowSettings(false)}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     variant="gradient"
                     onClick={() => setShowSettings(false)}
                   >
-                    Save Settings
+                    {t('notifications.saveSettings')}
                   </Button>
                 </div>
               </div>
