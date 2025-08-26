@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
@@ -16,33 +17,37 @@ import {
 } from 'lucide-react';
 
 const Calendar = () => {
+  const { t, i18n } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
+  
+  // Get current language
+  const currentLang = i18n.language === 'he' ? 'he' : 'en';
 
   // Sample events data
   const events = {
     '2024-01-15': [
-      { type: 'expiration', title: 'Contract Expiration', customer: 'John Doe', unit: 'A-102', priority: 'high' },
-      { type: 'payment', title: 'Payment Due', customer: 'Jane Smith', unit: 'A-103', amount: '$300' }
+      { type: 'expiration', title: t('calendar.contractExpiration'), customer: 'John Doe', unit: 'A-102', priority: 'high' },
+      { type: 'payment', title: t('calendar.paymentDue'), customer: 'Jane Smith', unit: 'A-103', amount: '$300' }
     ],
     '2024-01-20': [
-      { type: 'maintenance', title: 'Scheduled Maintenance', unit: 'B-204', time: '10:00 AM' }
+      { type: 'maintenance', title: t('calendar.scheduledMaintenance'), unit: 'B-204', time: '10:00 AM' }
     ],
     '2024-01-25': [
-      { type: 'expiration', title: 'Contract Expiration', customer: 'Mike Johnson', unit: 'B-202', priority: 'medium' }
+      { type: 'expiration', title: t('calendar.contractExpiration'), customer: 'Mike Johnson', unit: 'B-202', priority: 'medium' }
     ],
     '2024-01-28': [
-      { type: 'payment', title: 'Payment Due', customer: 'Sarah Wilson', unit: 'B-203', amount: '$225' },
-      { type: 'inspection', title: 'Unit Inspection', unit: 'C-301', time: '2:00 PM' }
+      { type: 'payment', title: t('calendar.paymentDue'), customer: 'Sarah Wilson', unit: 'B-203', amount: '$225' },
+      { type: 'inspection', title: t('calendar.unitInspection'), unit: 'C-301', time: '2:00 PM' }
     ]
   };
 
   const upcomingEvents = [
-    { date: '2024-01-15', type: 'expiration', title: 'Contract Expiration - A-102', customer: 'John Doe', daysLeft: 5 },
-    { date: '2024-01-15', type: 'payment', title: 'Payment Due - A-103', customer: 'Jane Smith', daysLeft: 5 },
-    { date: '2024-01-20', type: 'maintenance', title: 'Maintenance - B-204', time: '10:00 AM', daysLeft: 10 },
-    { date: '2024-01-25', type: 'expiration', title: 'Contract Expiration - B-202', customer: 'Mike Johnson', daysLeft: 15 },
-    { date: '2024-01-28', type: 'payment', title: 'Payment Due - B-203', customer: 'Sarah Wilson', daysLeft: 18 }
+    { date: '2024-01-15', type: 'expiration', title: `${t('calendar.contractExpiration')} - A-102`, customer: 'John Doe', daysLeft: 5 },
+    { date: '2024-01-15', type: 'payment', title: `${t('calendar.paymentDue')} - A-103`, customer: 'Jane Smith', daysLeft: 5 },
+    { date: '2024-01-20', type: 'maintenance', title: `${t('calendar.maintenance')} - B-204`, time: '10:00 AM', daysLeft: 10 },
+    { date: '2024-01-25', type: 'expiration', title: `${t('calendar.contractExpiration')} - B-202`, customer: 'Mike Johnson', daysLeft: 15 },
+    { date: '2024-01-28', type: 'payment', title: `${t('calendar.paymentDue')} - B-203`, customer: 'Sarah Wilson', daysLeft: 18 }
   ];
 
   const getDaysInMonth = (date) => {
@@ -66,7 +71,15 @@ const Calendar = () => {
   };
 
   const formatMonth = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const monthNames = {
+      en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+      he: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר']
+    };
+    
+    const monthName = monthNames[currentLang][date.getMonth()];
+    const year = date.getFullYear();
+    
+    return `${monthName} ${year}`;
   };
 
   const getDateKey = (day) => {
@@ -102,7 +115,7 @@ const Calendar = () => {
   };
 
   const days = getDaysInMonth(currentMonth);
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = [t('calendar.sun'), t('calendar.mon'), t('calendar.tue'), t('calendar.wed'), t('calendar.thu'), t('calendar.fri'), t('calendar.sat')];
 
   return (
     <div className="p-8 space-y-6">
@@ -113,12 +126,12 @@ const Calendar = () => {
         className="flex justify-between items-center"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Calendar</h1>
-          <p className="text-gray-500 mt-1">Track important dates and contract expirations</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('calendar.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('calendar.subtitle')}</p>
         </div>
         <Button variant="primary">
           <CalendarIcon className="w-4 h-4 mr-2" />
-          Add Event
+          {t('calendar.addEvent')}
         </Button>
       </motion.div>
 
@@ -138,19 +151,19 @@ const Calendar = () => {
                     onClick={previousMonth}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    {currentLang === 'he' ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
                   </button>
                   <button
                     onClick={() => setCurrentMonth(new Date())}
                     className="px-3 py-2 text-sm font-medium hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    Today
+                    {t('calendar.today')}
                   </button>
                   <button
                     onClick={nextMonth}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    {currentLang === 'he' ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
@@ -224,7 +237,7 @@ const Calendar = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Upcoming Events</span>
+                <span>{t('calendar.upcomingEvents')}</span>
                 <Badge variant="warning">
                   <Bell className="w-3 h-3 mr-1" />
                   {upcomingEvents.length}
@@ -281,25 +294,25 @@ const Calendar = () => {
           {/* Event Legend */}
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle>Event Types</CardTitle>
+              <CardTitle>{t('calendar.eventTypes')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Contract Expiration</span>
+                  <span className="text-sm text-gray-600">{t('calendar.contractExpiration')}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Payment Due</span>
+                  <span className="text-sm text-gray-600">{t('calendar.paymentDue')}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Maintenance</span>
+                  <span className="text-sm text-gray-600">{t('calendar.maintenance')}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Inspection</span>
+                  <span className="text-sm text-gray-600">{t('calendar.inspection')}</span>
                 </div>
               </div>
             </CardContent>
@@ -315,7 +328,7 @@ const Calendar = () => {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Events on {selectedDate}</CardTitle>
+              <CardTitle>{t('calendar.eventsOn')} {selectedDate}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -363,7 +376,7 @@ const Calendar = () => {
                     </div>
                     {event.priority && (
                       <Badge variant={event.priority === 'high' ? 'danger' : 'warning'}>
-                        {event.priority} priority
+                        {t(`calendar.${event.priority}`)} {t('calendar.priority')}
                       </Badge>
                     )}
                   </div>

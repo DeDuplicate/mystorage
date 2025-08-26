@@ -38,7 +38,8 @@
     "remove": "הסר",
     "hoursAgo": "לפני {{count}} שעות",
     "daysAgo": "לפני יום",
-    "daysAgo_plural": "לפני {{count}} ימים"
+    "daysAgo_plural": "לפני {{count}} ימים",
+    "currentLanguage": "עברית"
   },
   "navigation": {
     "dashboard": "לוח בקרה",
@@ -508,13 +509,16 @@
   },
   "calendar": {
     "title": "לוח שנה",
-    "subtitle": "צפה ונהל תאריכים חשובים",
+    "subtitle": "מעקב תאריכים חשובים ופקיעות חוזים",
     "today": "היום",
     "month": "חודש",
     "week": "שבוע",
     "day": "יום",
     "addEvent": "הוסף אירוע",
     "contractExpiry": "פקיעת חוזה",
+    "contractExpiration": "פקיעת חוזה",
+    "scheduledMaintenance": "תחזוקה מתוכננת",
+    "unitInspection": "בדיקת יחידה",
     "paymentDue": "תשלום לפירעון",
     "maintenance": "תחזוקה",
     "inspection": "בדיקה",
@@ -526,7 +530,21 @@
     "eventTime": "שעה",
     "eventDescription": "תיאור",
     "recurring": "חוזר",
-    "reminder": "תזכורת"
+    "reminder": "תזכורת",
+    "upcomingEvents": "אירועים קרובים",
+    "eventTypes": "סוגי אירועים",
+    "eventsOn": "אירועים ב",
+    "priority": "עדיפות",
+    "high": "גבוהה",
+    "medium": "בינונית",
+    "low": "נמוכה",
+    "sun": "א",
+    "mon": "ב",
+    "tue": "ג",
+    "wed": "ד",
+    "thu": "ה",
+    "fri": "ו",
+    "sat": "ש"
   },
   "messages": {
     "success": {
