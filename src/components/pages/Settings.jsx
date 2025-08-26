@@ -57,6 +57,7 @@ const Settings = () => {
   const [activeSection, setActiveSection] = useState('profile');
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showUnsavedChanges, setShowUnsavedChanges] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [settings, setSettings] = useState({
     // User Profile
     profile: {
@@ -382,6 +383,67 @@ const Settings = () => {
     }
   };
 
+  // Avatar upload functions
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert(t('settings.selectImageFile'));
+      return;
+    }
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      alert(t('settings.fileTooLarge'));
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      // Convert image to base64 for storage
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const avatarData = e.target.result;
+        
+        // Update settings with new avatar
+        handleInputChange('profile', 'avatar', avatarData);
+        setIsUploadingAvatar(false);
+        
+        // Show success message
+        setTimeout(() => {
+          alert(t('messages.success.uploaded'));
+        }, 100);
+      };
+      
+      reader.onerror = () => {
+        setIsUploadingAvatar(false);
+        alert(t('messages.error.general'));
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      setIsUploadingAvatar(false);
+      alert(t('messages.error.general'));
+    }
+  };
+
+  const triggerAvatarUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = handleAvatarUpload;
+    input.click();
+  };
+
+  const removeAvatar = () => {
+    if (window.confirm(t('settings.removeProfilePicture'))) {
+      handleInputChange('profile', 'avatar', null);
+    }
+  };
+
   // Render profile section
   const renderProfileSection = () => (
     <div className="space-y-6">
@@ -390,14 +452,38 @@ const Settings = () => {
           <CardTitle>{t('settings.personalInfo')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-primary-600" />
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center overflow-hidden">
+                {settings.profile.avatar ? (
+                  <img 
+                    src={settings.profile.avatar} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-8 h-8 text-primary-600" />
+                )}
+              </div>
+              {settings.profile.avatar && (
+                <button
+                  onClick={removeAvatar}
+                  className="absolute -top-1 -right-1 bg-danger-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-danger-600 transition-colors"
+                  title="Remove avatar"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
             </div>
             <div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={triggerAvatarUpload}
+                disabled={isUploadingAvatar}
+              >
                 <Camera className="w-4 h-4 mr-2" />
-{t('settings.changeAvatar')}
+                {isUploadingAvatar ? t('settings.uploadingAvatar') : t('settings.changeAvatar')}
               </Button>
               <p className="text-sm text-gray-500 mt-1">JPG, PNG up to 2MB</p>
             </div>
@@ -1150,7 +1236,7 @@ const Settings = () => {
 
           {/* Action Buttons */}
           <div className="mt-8 flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-6">
               <Button variant="outline" onClick={handleExport}>
                 <Download className="w-4 h-4 mr-2" />
 {t('settings.exportSettings')}

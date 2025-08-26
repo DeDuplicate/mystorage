@@ -682,7 +682,11 @@
     "createFirstPresetButton": "צור הגדרה ראשונה",
     "monthlyRentPreview": "תצוגה מקדימה של שכירות חודשית",
     "perSqFt": "למטר מרובע",
-    "sizeNamePlaceholder": "לדוגמה: קטן, בינוני, גדול"
+    "sizeNamePlaceholder": "לדוגמה: קטן, בינוני, גדול",
+    "uploadingAvatar": "מעלה...",
+    "selectImageFile": "אנא בחר קובץ תמונה",
+    "fileTooLarge": "גודל הקובץ חייב להיות פחות מ-2MB",
+    "removeProfilePicture": "האם אתה בטוח שברצונך להסיר את תמונת הפרופיל?"
   },
   "calendar": {
     "title": "לוח שנה",

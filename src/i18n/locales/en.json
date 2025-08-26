@@ -682,7 +682,11 @@
     "createFirstPresetButton": "Create First Preset",
     "monthlyRentPreview": "Monthly Rent Preview",
     "perSqFt": "per sq ft",
-    "sizeNamePlaceholder": "e.g., Small, Medium, Large"
+    "sizeNamePlaceholder": "e.g., Small, Medium, Large",
+    "uploadingAvatar": "Uploading...",
+    "selectImageFile": "Please select an image file",
+    "fileTooLarge": "File size must be less than 2MB",
+    "removeProfilePicture": "Are you sure you want to remove your profile picture?"
   },
   "calendar": {
     "title": "Calendar",
