@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 import {
   Plus,
   Edit2,
@@ -338,7 +339,7 @@ const StorageUnits = () => {
 
         <Card className="text-center">
           <DollarSign className="w-8 h-8 mx-auto mb-2 text-success-600" />
-          <p className="text-2xl font-bold">${stats.monthlyRevenue}</p>
+          <p className="text-2xl font-bold">{formatCurrency(stats.monthlyRevenue)}</p>
           <p className="text-xs text-gray-600">{t('reports.monthlyRevenue')}</p>
         </Card>
 
@@ -459,7 +460,7 @@ const StorageUnits = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">{t('units.monthlyRate')}:</span>
-                    <span className="font-bold text-primary-600">${unit.monthly_rate}/mo</span>
+                    <span className="font-bold text-primary-600">{formatCurrency(unit.monthly_rate)}/{t('common.month') || 'mo'}</span>
                   </div>
                   {unit.customer_name && (
                     <>
@@ -517,7 +518,7 @@ const StorageUnits = () => {
                     <td className="py-3 px-4 font-medium">{unit.unit_number}</td>
                     <td className="py-3 px-4">{unit.floor}</td>
                     <td className="py-3 px-4">{unit.size}</td>
-                    <td className="py-3 px-4 font-bold">${unit.monthly_rate}</td>
+                    <td className="py-3 px-4 font-bold">{formatCurrency(unit.monthly_rate)}</td>
                     <td className="py-3 px-4">
                       <Badge
                         variant={
@@ -646,7 +647,7 @@ const StorageUnits = () => {
                         >
                           {Object.entries(unitSizes).map(([value, info]) => (
                             <option key={value} value={value}>
-                              {info.label} - ${info.defaultPrice}/mo
+                              {info.label} - {formatCurrency(info.defaultPrice)}/{t('common.month') || 'mo'}
                             </option>
                           ))}
                         </select>
@@ -654,7 +655,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('units.monthlyRate')} ($) *
+                          {t('units.monthlyRate')} ({getCurrencySymbol()}) *
                         </label>
                         <input
                           type="number"
