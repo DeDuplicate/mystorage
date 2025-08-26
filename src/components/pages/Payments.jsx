@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
@@ -26,6 +28,7 @@ import {
 } from 'lucide-react';
 
 const Payments = () => {
+  const { t } = useTranslation();
   const {
     payments,
     setPayments,
@@ -92,7 +95,7 @@ const Payments = () => {
             unit_id: customerContract.unit_id || '',
             contract_id: customerContract.id,
             amount: customerContract.monthly_rate || 0,
-            notes: `Monthly payment for ${unit?.unit_number || 'unit'}`
+            notes: t('payments.monthlyPaymentFor', { unit: unit?.unit_number || t('payments.unit') })
           }));
         }
       }
@@ -108,7 +111,7 @@ const Payments = () => {
           customer_id: unit.customer_id,
           contract_id: contract?.id || '',
           amount: unit.monthly_rate || 0,
-          notes: `Monthly payment for ${unit.unit_number}`
+          notes: t('payments.monthlyPaymentFor', { unit: unit.unit_number })
         }));
       }
     }
@@ -185,16 +188,16 @@ const Payments = () => {
 
   // Delete payment
   const handleDelete = (paymentId) => {
-    if (window.confirm('Are you sure you want to delete this payment? This action cannot be undone.')) {
+    if (window.confirm(t('payments.confirmDelete'))) {
       setPayments(prev => prev.filter(payment => payment.id !== paymentId));
     }
   };
 
   const stats = {
-    totalRevenue: '$12,450',
-    monthlyRevenue: '$3,200',
-    pendingAmount: '$1,875',
-    overdueAmount: '$675',
+    totalRevenue: formatCurrency(12450),
+    monthlyRevenue: formatCurrency(3200),
+    pendingAmount: formatCurrency(1875),
+    overdueAmount: formatCurrency(675),
     successRate: '92%',
     expiringRentals: payments.filter(p => {
       const rentalEnd = new Date(p.rentalEnd);
@@ -238,8 +241,8 @@ const Payments = () => {
         className="flex justify-between items-center"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
-          <p className="text-gray-500 mt-1">Track and manage all payment transactions</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('payments.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('payments.subtitle')}</p>
         </div>
         <div className="flex space-x-3">
           <Button
@@ -247,11 +250,11 @@ const Payments = () => {
             onClick={() => setShowAddModal(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Payment
+            {t('payments.addPayment')}
           </Button>
           <Button variant="outline">
             <Download className="w-4 h-4 mr-2" />
-            Export Report
+            {t('payments.exportReport')}
           </Button>
         </div>
       </motion.div>
@@ -267,7 +270,7 @@ const Payments = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-green-600 font-medium">Total Revenue</p>
+                  <p className="text-xs text-green-600 font-medium">{t('payments.totalRevenue')}</p>
                   <p className="text-2xl font-bold text-green-900">{stats.totalRevenue}</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-green-500" />
@@ -285,7 +288,7 @@ const Payments = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-blue-600 font-medium">This Month</p>
+                  <p className="text-xs text-blue-600 font-medium">{t('payments.thisMonth')}</p>
                   <p className="text-2xl font-bold text-blue-900">{stats.monthlyRevenue}</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-blue-500" />
@@ -303,7 +306,7 @@ const Payments = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-yellow-600 font-medium">Pending</p>
+                  <p className="text-xs text-yellow-600 font-medium">{t('payments.pending')}</p>
                   <p className="text-2xl font-bold text-yellow-900">{stats.pendingAmount}</p>
                 </div>
                 <Clock className="w-8 h-8 text-yellow-500" />
@@ -321,7 +324,7 @@ const Payments = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-red-600 font-medium">Overdue</p>
+                  <p className="text-xs text-red-600 font-medium">{t('payments.overdue')}</p>
                   <p className="text-2xl font-bold text-red-900">{stats.overdueAmount}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-red-500" />
@@ -339,7 +342,7 @@ const Payments = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-purple-600 font-medium">Success Rate</p>
+                  <p className="text-xs text-purple-600 font-medium">{t('payments.successRate')}</p>
                   <p className="text-2xl font-bold text-purple-900">{stats.successRate}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-purple-500" />
@@ -357,7 +360,7 @@ const Payments = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-orange-600 font-medium">Rentals Expiring Soon</p>
+                  <p className="text-xs text-orange-600 font-medium">{t('payments.rentalsExpiringSoon')}</p>
                   <p className="text-2xl font-bold text-orange-900">{stats.expiringRentals}</p>
                 </div>
                 <Home className="w-8 h-8 text-orange-500" />
@@ -376,7 +379,7 @@ const Payments = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search payments..."
+                  placeholder={t('payments.searchPayments')}
                   className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
@@ -385,25 +388,25 @@ const Payments = () => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="all">All Status</option>
-                <option value="paid">Paid</option>
-                <option value="pending">Pending</option>
-                <option value="overdue">Overdue</option>
-                <option value="failed">Failed</option>
+                <option value="all">{t('payments.allStatus')}</option>
+                <option value="paid">{t('payments.paid')}</option>
+                <option value="pending">{t('payments.pending')}</option>
+                <option value="overdue">{t('payments.overdue')}</option>
+                <option value="failed">{t('payments.failed')}</option>
               </select>
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
                 className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
+                <option value="today">{t('payments.today')}</option>
+                <option value="week">{t('payments.thisWeek')}</option>
+                <option value="month">{t('payments.thisMonth')}</option>
+                <option value="year">{t('payments.thisYear')}</option>
               </select>
               <Button variant="outline">
                 <Filter className="w-4 h-4 mr-2" />
-                More Filters
+                {t('payments.moreFilters')}
               </Button>
             </div>
           </div>
@@ -413,22 +416,22 @@ const Payments = () => {
       {/* Payments Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>{t('payments.recentTransactions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rental Expires</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payments.customer')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payments.unit')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payments.amount')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.status')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payments.paymentDate')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payments.rentalExpires')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('payments.method')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.notes')}</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -450,24 +453,24 @@ const Payments = () => {
                       <span className="text-sm text-gray-600">{payment.unit}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-gray-900">${payment.amount}</span>
+                      <span className="text-sm font-semibold text-gray-900">{formatCurrency(payment.amount)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant={getStatusColor(payment.status)}>
                         <span className="flex items-center space-x-1">
                           {getStatusIcon(payment.status)}
-                          <span>{payment.status}</span>
+                          <span>{t(`payments.${payment.status}`)}</span>
                         </span>
                       </Badge>
                       {payment.daysOverdue && (
-                        <span className="ml-2 text-xs text-red-600">({payment.daysOverdue} days)</span>
+                        <span className="ml-2 text-xs text-red-600">({payment.daysOverdue} {t('common.days')})</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-600">
                         <div>{payment.paymentDate || '-'}</div>
                         {payment.dueDate && (
-                          <div className="text-xs text-gray-500">Due: {payment.dueDate}</div>
+                          <div className="text-xs text-gray-500">{t('payments.due')}: {payment.dueDate}</div>
                         )}
                       </div>
                     </td>
@@ -476,7 +479,7 @@ const Payments = () => {
                         <div>{payment.rentalEnd ? new Date(payment.rentalEnd).toLocaleDateString() : '-'}</div>
                         {payment.rentalEnd && (
                           <div className="text-xs text-gray-500">
-                            {Math.ceil((new Date(payment.rentalEnd) - new Date()) / (1000 * 60 * 60 * 24))} days left
+                            {Math.ceil((new Date(payment.rentalEnd) - new Date()) / (1000 * 60 * 60 * 24))} {t('payments.daysLeft')}
                           </div>
                         )}
                       </div>
@@ -500,14 +503,14 @@ const Payments = () => {
                         <button
                           onClick={() => handleEdit(payment)}
                           className="p-1.5 text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
-                          title="Edit Payment"
+                          title={t('payments.editPayment')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(payment.id)}
                           className="p-1.5 text-danger-500 hover:bg-danger-50 rounded-lg transition-colors"
-                          title="Delete Payment"
+                          title={t('payments.deletePayment')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -540,7 +543,7 @@ const Payments = () => {
             >
               <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">
-                  {editingPayment ? 'Edit Payment' : 'Add New Payment'}
+                  {editingPayment ? t('payments.editPayment') : t('payments.addNewPayment')}
                 </h2>
                 <button
                   onClick={() => {
@@ -557,11 +560,11 @@ const Payments = () => {
                 <div className="grid grid-cols-2 gap-6">
                   {/* Left Column */}
                   <div>
-                    <h3 className="font-semibold mb-4">Customer & Unit</h3>
+                    <h3 className="font-semibold mb-4">{t('payments.customerAndUnit')}</h3>
                     {editingPayment && (
                       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
-                          <strong>Editing Payment:</strong> {editingPayment.id}
+                          <strong>{t('payments.editingPayment')}:</strong> {editingPayment.id}
                         </p>
                       </div>
                     )}
@@ -569,7 +572,7 @@ const Payments = () => {
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Select Customer *
+                          {t('payments.selectCustomer')} *
                         </label>
                         <select
                           name="customer_id"
@@ -578,7 +581,7 @@ const Payments = () => {
                           required
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="">Select Customer</option>
+                          <option value="">{t('payments.selectCustomer')}</option>
                           {customers.map(customer => (
                             <option key={customer.id} value={customer.id}>
                               {customer.name} - {customer.phone}
@@ -589,7 +592,7 @@ const Payments = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Select Unit *
+                          {t('payments.selectUnit')} *
                         </label>
                         <select
                           name="unit_id"
@@ -598,10 +601,10 @@ const Payments = () => {
                           required
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="">Select Unit</option>
+                          <option value="">{t('payments.selectUnit')}</option>
                           {getOccupiedUnits().map(unit => (
                             <option key={unit.id} value={unit.id}>
-                              {unit.unit_number} - {unit.customer_name} - ${unit.monthly_rate}/mo
+                              {unit.unit_number} - {unit.customer_name} - {formatCurrency(unit.monthly_rate)}/{t('common.month')}
                             </option>
                           ))}
                         </select>
@@ -609,7 +612,7 @@ const Payments = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Amount ($) *
+                          {t('payments.amount')} ({getCurrencySymbol()}) *
                         </label>
                         <input
                           type="number"
@@ -625,7 +628,7 @@ const Payments = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Payment Status *
+                          {t('payments.paymentStatus')} *
                         </label>
                         <select
                           name="status"
@@ -633,10 +636,10 @@ const Payments = () => {
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="pending">Pending</option>
-                          <option value="paid">Paid</option>
-                          <option value="overdue">Overdue</option>
-                          <option value="failed">Failed</option>
+                          <option value="pending">{t('payments.pending')}</option>
+                          <option value="paid">{t('payments.paid')}</option>
+                          <option value="overdue">{t('payments.overdue')}</option>
+                          <option value="failed">{t('payments.failed')}</option>
                         </select>
                       </div>
                     </div>
@@ -644,12 +647,12 @@ const Payments = () => {
 
                   {/* Right Column */}
                   <div>
-                    <h3 className="font-semibold mb-4">Payment Details</h3>
+                    <h3 className="font-semibold mb-4">{t('payments.paymentDetails')}</h3>
                     
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Payment Date
+                          {t('payments.paymentDate')}
                         </label>
                         <input
                           type="date"
@@ -662,7 +665,7 @@ const Payments = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Due Date *
+                          {t('payments.dueDate')} *
                         </label>
                         <input
                           type="date"
@@ -676,7 +679,7 @@ const Payments = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Payment Method
+                          {t('payments.paymentMethod')}
                         </label>
                         <select
                           name="method"
@@ -684,17 +687,17 @@ const Payments = () => {
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="Credit Card">Credit Card</option>
-                          <option value="Bank Transfer">Bank Transfer</option>
-                          <option value="Cash">Cash</option>
-                          <option value="Check">Check</option>
-                          <option value="Online Payment">Online Payment</option>
+                          <option value="Credit Card">{t('payments.creditCard')}</option>
+                          <option value="Bank Transfer">{t('payments.bankTransfer')}</option>
+                          <option value="Cash">{t('payments.cash')}</option>
+                          <option value="Check">{t('payments.check')}</option>
+                          <option value="Online Payment">{t('payments.onlinePayment')}</option>
                         </select>
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Notes
+                          {t('common.notes')}
                         </label>
                         <textarea
                           name="notes"
@@ -702,7 +705,7 @@ const Payments = () => {
                           onChange={handleInputChange}
                           rows="3"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="Payment notes or comments..."
+                          placeholder={t('payments.paymentNotesPlaceholder')}
                         />
                       </div>
                     </div>
@@ -719,11 +722,11 @@ const Payments = () => {
                       setEditingPayment(null);
                     }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" variant="gradient">
                     <Save className="w-5 h-5 mr-2" />
-                    {editingPayment ? 'Update Payment' : 'Add Payment'}
+                    {editingPayment ? t('payments.updatePayment') : t('payments.addPayment')}
                   </Button>
                 </div>
               </form>
