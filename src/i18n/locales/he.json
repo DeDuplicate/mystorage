@@ -32,6 +32,7 @@
     "all": "הכל",
     "soon": "בקרוב",
     "days": "ימים",
+    "month": "חודש",
     "hoursAgo": "לפני {{count}} שעות",
     "daysAgo": "לפני יום",
     "daysAgo_plural": "לפני {{count}} ימים"

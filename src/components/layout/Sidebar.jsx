@@ -1,6 +1,8 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../ui/LanguageSwitcher';
 import {
   Home,
   Package,
@@ -16,21 +18,23 @@ import {
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
+  const { t } = useTranslation();
+  
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'units', label: 'Storage Units', icon: Package },
-    { id: 'customers', label: 'Customers', icon: Users },
-    { id: 'contracts', label: 'Contracts', icon: FileText },
-    { id: 'payments', label: 'Payments', icon: DollarSign },
-    { id: 'documents', label: 'Documents', icon: FolderOpen },
-    { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'reports', label: 'Reports', icon: BarChart3 },
+    { id: 'dashboard', label: t('navigation.dashboard'), icon: Home },
+    { id: 'units', label: t('navigation.units'), icon: Package },
+    { id: 'customers', label: t('navigation.customers'), icon: Users },
+    { id: 'contracts', label: t('navigation.contracts'), icon: FileText },
+    { id: 'payments', label: t('navigation.payments'), icon: DollarSign },
+    { id: 'documents', label: t('navigation.documents'), icon: FolderOpen },
+    { id: 'calendar', label: t('navigation.calendar'), icon: Calendar },
+    { id: 'reports', label: t('navigation.reports'), icon: BarChart3 },
   ];
 
   const bottomItems = [
-    { id: 'notifications', label: 'Notifications', icon: Bell, badge: 3 },
-    { id: 'settings', label: 'Settings', icon: Settings },
-    { id: 'logout', label: 'Logout', icon: LogOut },
+    { id: 'notifications', label: t('navigation.notifications'), icon: Bell, badge: 3 },
+    { id: 'settings', label: t('navigation.settings'), icon: Settings },
+    { id: 'logout', label: t('common.logout'), icon: LogOut },
   ];
 
   return (
@@ -122,6 +126,11 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             )}
           </button>
         ))}
+      </div>
+
+      {/* Language Switcher */}
+      <div className="p-4 border-t border-gray-200/20">
+        <LanguageSwitcher />
       </div>
 
       {/* User Profile */}

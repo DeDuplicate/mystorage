@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
 import {
@@ -40,7 +41,7 @@ const Dashboard = () => {
   const metrics = [
     {
       title: t('dashboard.totalRevenue'),
-      value: '$67,420',
+      value: formatCurrency(67420),
       change: '+12.5%',
       trend: 'up',
       icon: DollarSign,
@@ -68,7 +69,7 @@ const Dashboard = () => {
     {
       title: t('dashboard.overduePayments'),
       value: '12',
-      subtitle: '$8,450 ' + t('payments.pending').toLowerCase(),
+      subtitle: formatCurrency(8450) + ' ' + t('payments.pending').toLowerCase(),
       alert: true,
       icon: AlertCircle,
       color: 'from-orange-500 to-red-600',
@@ -82,7 +83,7 @@ const Dashboard = () => {
       type: 'payment', 
       messageKey: 'dashboard.activities.paymentReceived',
       messageData: { customer: 'John Doe' },
-      amount: '$250', 
+      amount: formatCurrency(250), 
       time: t('common.hoursAgo', { count: 2 }), 
       status: 'success' 
     },
