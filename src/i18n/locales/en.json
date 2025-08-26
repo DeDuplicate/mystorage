@@ -424,7 +424,22 @@
     "monthlyTrend": "Monthly Trend",
     "unitDistribution": "Unit Distribution",
     "paymentStatus": "Payment Status",
-    "customerGrowth": "Customer Growth"
+    "customerGrowth": "Customer Growth",
+    "floor": "Floor",
+    "revenue": "Revenue",
+    "unitsBySize": "Units by Size",
+    "activeCustomers": "Active Customers",
+    "paymentSuccess": "Payment Success",
+    "paidPayments": "paid payments",
+    "contractsExpiringSoon": "Contracts Expiring Soon",
+    "expiresSoon": "Expires Soon",
+    "topPerformingUnits": "Top Performing Units",
+    "avgContractValue": "Avg Contract Value",
+    "pendingContracts": "Pending Contracts",
+    "generatedOn": "Generated on",
+    "at": "at",
+    "reportPeriod": "Report period",
+    "units": "units"
   },
   "notifications": {
     "title": "Notifications",

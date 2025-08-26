@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { formatCurrency } from '../../utils/currency';
 import { useAppContext } from '../../context/AppContext';
 import {
   LineChart,
@@ -49,6 +51,7 @@ import {
 } from 'lucide-react';
 
 const Reports = () => {
+  const { t } = useTranslation();
   const {
     customers,
     units,
@@ -65,23 +68,23 @@ const Reports = () => {
 
   // Time range options
   const timeRanges = {
-    'week': { label: 'Last 7 Days', days: 7 },
-    'month': { label: 'This Month', days: 30 },
-    'quarter': { label: 'This Quarter', days: 90 },
-    'year': { label: 'This Year', days: 365 },
-    'custom': { label: 'Custom Range', days: null }
+    'week': { label: t('reports.lastWeek'), days: 7 },
+    'month': { label: t('reports.thisMonth'), days: 30 },
+    'quarter': { label: t('reports.thisQuarter'), days: 90 },
+    'year': { label: t('reports.thisYear'), days: 365 },
+    'custom': { label: t('reports.customRange'), days: null }
   };
 
   // Report types
   const reportTypes = {
-    overview: { label: 'Business Overview', icon: Activity },
-    financial: { label: 'Financial Reports', icon: DollarSign },
-    occupancy: { label: 'Occupancy Analysis', icon: Home },
-    customer: { label: 'Customer Analytics', icon: Users },
-    payments: { label: 'Payment Reports', icon: CheckCircle },
-    contracts: { label: 'Contract Management', icon: FileText },
-    documents: { label: 'Document Statistics', icon: FileText },
-    performance: { label: 'Performance Metrics', icon: TrendingUp }
+    overview: { label: t('reports.businessOverview'), icon: Activity },
+    financial: { label: t('reports.financialReports'), icon: DollarSign },
+    occupancy: { label: t('reports.occupancyAnalysis'), icon: Home },
+    customer: { label: t('reports.customerAnalytics'), icon: Users },
+    payments: { label: t('reports.paymentReports'), icon: CheckCircle },
+    contracts: { label: t('reports.contractManagement'), icon: FileText },
+    documents: { label: t('reports.documentStatistics'), icon: FileText },
+    performance: { label: t('reports.performanceMetrics'), icon: TrendingUp }
   };
 
   // Calculate comprehensive report data
@@ -165,7 +168,7 @@ const Reports = () => {
 
       // Floor Analytics
       const floorBreakdown = units.reduce((acc, unit) => {
-        const floor = `Floor ${unit.floor}`;
+        const floor = `${t('reports.floor')} ${unit.floor}`;
         acc[floor] = (acc[floor] || 0) + 1;
         return acc;
       }, {});
@@ -350,7 +353,7 @@ const Reports = () => {
       <CardHeader>
         <CardTitle className="flex items-center">
           <BarChart3 className="w-5 h-5 mr-2" />
-          Monthly Revenue Trend
+          {t('reports.monthlyTrend')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -360,7 +363,7 @@ const Reports = () => {
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip 
-              formatter={(value) => [`$${value.toLocaleString()}`, 'Revenue']}
+              formatter={(value) => [formatCurrency(value), t('reports.revenue')]}
               labelStyle={{ color: '#374151' }}
             />
             <Legend />
@@ -390,7 +393,7 @@ const Reports = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <PieChart className="w-5 h-5 mr-2" />
-            Unit Distribution by Floor
+            {t('reports.unitDistribution')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -431,7 +434,7 @@ const Reports = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <BarChart3 className="w-5 h-5 mr-2" />
-            Units by Size
+            {t('reports.unitsBySize')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -453,10 +456,10 @@ const Reports = () => {
   // Render payment status distribution chart
   const PaymentStatusChart = ({ data }) => {
     const chartData = [
-      { name: 'Paid', value: data?.paidPayments || 0, color: '#10B981' },
-      { name: 'Pending', value: data?.pendingPayments || 0, color: '#F59E0B' },
-      { name: 'Overdue', value: data?.overduePayments || 0, color: '#EF4444' },
-      { name: 'Failed', value: data?.failedPayments || 0, color: '#6B7280' }
+      { name: t('payments.paid'), value: data?.paidPayments || 0, color: '#10B981' },
+      { name: t('payments.pending'), value: data?.pendingPayments || 0, color: '#F59E0B' },
+      { name: t('payments.overdue'), value: data?.overduePayments || 0, color: '#EF4444' },
+      { name: t('payments.failed'), value: data?.failedPayments || 0, color: '#6B7280' }
     ].filter(item => item.value > 0);
 
     return (
@@ -464,7 +467,7 @@ const Reports = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <PieChart className="w-5 h-5 mr-2" />
-            Payment Status Distribution
+            {t('reports.paymentStatus')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -499,7 +502,7 @@ const Reports = () => {
       <CardHeader>
         <CardTitle className="flex items-center">
           <BarChart3 className="w-5 h-5 mr-2" />
-          Customer Acquisition Trend
+          {t('reports.customerGrowth')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -523,32 +526,32 @@ const Reports = () => {
       {/* Key Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard
-          title="Total Revenue"
-          value={`$${reportData.financial?.totalRevenue?.toLocaleString() || 0}`}
+          title={t('reports.totalRevenue')}
+          value={formatCurrency(reportData.financial?.totalRevenue || 0)}
           change={reportData.financial?.revenueGrowth || 0}
           icon={DollarSign}
           color="green"
         />
         <MetricCard
-          title="Occupancy Rate"
+          title={t('reports.occupancyRate')}
           value={`${reportData.occupancy?.occupancyRate?.toFixed(1) || 0}%`}
           icon={Home}
           color="blue"
-          trend={`${reportData.occupancy?.occupiedUnits || 0}/${reportData.occupancy?.totalUnits || 0} units`}
+          trend={`${reportData.occupancy?.occupiedUnits || 0}/${reportData.occupancy?.totalUnits || 0} ${t('reports.units')}`}
         />
         <MetricCard
-          title="Active Customers"
+          title={t('reports.activeCustomers')}
           value={reportData.customer?.totalCustomers || 0}
           icon={Users}
           color="purple"
-          trend={`${reportData.customer?.activeContracts || 0} active contracts`}
+          trend={`${reportData.customer?.activeContracts || 0} ${t('reports.activeContracts')}`}
         />
         <MetricCard
-          title="Payment Success"
+          title={t('reports.paymentSuccess')}
           value={`${reportData.payments?.paymentSuccessRate?.toFixed(1) || 0}%`}
           icon={CheckCircle}
           color="emerald"
-          trend={`${reportData.payments?.paidPayments || 0} paid payments`}
+          trend={`${reportData.payments?.paidPayments || 0} ${t('reports.paidPayments')}`}
         />
       </div>
 
@@ -562,7 +565,7 @@ const Reports = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Contracts Expiring Soon</CardTitle>
+            <CardTitle>{t('reports.contractsExpiringSoon')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -586,7 +589,7 @@ const Reports = () => {
                         {new Date(contract.end_date).toLocaleDateString()}
                       </p>
                       <Badge variant="warning" className="text-xs">
-                        Expires Soon
+                        {t('reports.expiresSoon')}
                       </Badge>
                     </div>
                   </div>
@@ -597,7 +600,7 @@ const Reports = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Performing Units</CardTitle>
+            <CardTitle>{t('reports.topPerformingUnits')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -609,9 +612,9 @@ const Reports = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-green-600">
-                      ${unit.revenue}/mo
+                      {formatCurrency(unit.revenue)}/{t('common.month')}
                     </p>
-                    <p className="text-xs text-gray-500">{unit.size} ft</p>
+                    <p className="text-xs text-gray-500">{unit.size} {t('common.ft')}</p>
                   </div>
                 </div>
               ))}
@@ -627,26 +630,26 @@ const Reports = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard
-          title="Total Revenue"
-          value={`$${reportData.financial?.totalRevenue?.toLocaleString() || 0}`}
+          title={t('reports.totalRevenue')}
+          value={formatCurrency(reportData.financial?.totalRevenue || 0)}
           icon={DollarSign}
           color="green"
         />
         <MetricCard
-          title="Monthly Revenue"
-          value={`$${reportData.financial?.monthlyRevenue?.toLocaleString() || 0}`}
+          title={t('reports.monthlyRevenue')}
+          value={formatCurrency(reportData.financial?.monthlyRevenue || 0)}
           icon={TrendingUp}
           color="blue"
         />
         <MetricCard
-          title="Pending Revenue"
-          value={`$${reportData.financial?.pendingRevenue?.toLocaleString() || 0}`}
+          title={t('reports.pendingRevenue')}
+          value={formatCurrency(reportData.financial?.pendingRevenue || 0)}
           icon={Clock}
           color="yellow"
         />
         <MetricCard
-          title="Overdue Amount"
-          value={`$${reportData.financial?.overdueAmount?.toLocaleString() || 0}`}
+          title={t('reports.overdueAmount')}
+          value={formatCurrency(reportData.financial?.overdueAmount || 0)}
           icon={AlertCircle}
           color="red"
         />
@@ -664,25 +667,25 @@ const Reports = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricCard
-          title="Total Units"
+          title={t('reports.totalUnits')}
           value={reportData.occupancy?.totalUnits || 0}
           icon={Home}
           color="blue"
         />
         <MetricCard
-          title="Occupied Units"
+          title={t('reports.occupiedUnits')}
           value={reportData.occupancy?.occupiedUnits || 0}
           icon={CheckCircle}
           color="green"
         />
         <MetricCard
-          title="Available Units"
+          title={t('reports.availableUnits')}
           value={reportData.occupancy?.availableUnits || 0}
           icon={Target}
           color="purple"
         />
         <MetricCard
-          title="Occupancy Rate"
+          title={t('reports.occupancyRate')}
           value={`${reportData.occupancy?.occupancyRate?.toFixed(1) || 0}%`}
           icon={Percent}
           color="orange"
@@ -710,25 +713,25 @@ const Reports = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <MetricCard
-                title="Total Customers"
+                title={t('reports.totalCustomers')}
                 value={reportData.customer?.totalCustomers || 0}
                 icon={Users}
                 color="blue"
               />
               <MetricCard
-                title="Active Contracts"
+                title={t('reports.activeContracts')}
                 value={reportData.customer?.activeContracts || 0}
                 icon={FileText}
                 color="green"
               />
               <MetricCard
-                title="Avg Contract Value"
-                value={`$${reportData.customer?.averageContractValue?.toFixed(0) || 0}`}
+                title={t('reports.avgContractValue')}
+                value={formatCurrency(reportData.customer?.averageContractValue || 0)}
                 icon={DollarSign}
                 color="purple"
               />
               <MetricCard
-                title="Pending Contracts"
+                title={t('reports.pendingContracts')}
                 value={reportData.customer?.pendingContracts || 0}
                 icon={Clock}
                 color="yellow"
@@ -746,8 +749,8 @@ const Reports = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold gradient-text mb-2">Reports & Analytics</h1>
-        <p className="text-gray-600">Comprehensive business insights and performance metrics</p>
+        <h1 className="text-4xl font-bold gradient-text mb-2">{t('reports.title')}</h1>
+        <p className="text-gray-600">{t('reports.subtitle')}</p>
       </div>
 
       {/* Controls */}
@@ -785,7 +788,7 @@ const Reports = () => {
             onClick={() => window.location.reload()}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+            {t('common.refresh')}
           </Button>
         </div>
 
@@ -796,21 +799,21 @@ const Reports = () => {
             onClick={() => handleExport('pdf')}
           >
             <Download className="w-4 h-4 mr-2" />
-            Export PDF
+            {t('reports.exportPDF')}
           </Button>
           <Button
             variant="outline"
             onClick={() => handleExport('excel')}
           >
             <Download className="w-4 h-4 mr-2" />
-            Export Excel
+            {t('reports.exportExcel')}
           </Button>
           <Button
             variant="outline"
             onClick={handlePrint}
           >
             <Printer className="w-4 h-4 mr-2" />
-            Print
+            {t('reports.print')}
           </Button>
         </div>
       </div>
@@ -829,10 +832,10 @@ const Reports = () => {
       <div className="mt-8 pt-6 border-t border-gray-200">
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div>
-            Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+            {t('reports.generatedOn')} {new Date().toLocaleDateString()} {t('reports.at')} {new Date().toLocaleTimeString()}
           </div>
           <div>
-            Report period: {timeRanges[selectedTimeRange].label}
+            {t('reports.reportPeriod')}: {timeRanges[selectedTimeRange].label}
           </div>
         </div>
       </div>

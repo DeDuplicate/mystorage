@@ -424,7 +424,22 @@
     "monthlyTrend": "מגמה חודשית",
     "unitDistribution": "התפלגות יחידות",
     "paymentStatus": "סטטוס תשלומים",
-    "customerGrowth": "גידול בלקוחות"
+    "customerGrowth": "גידול בלקוחות",
+    "floor": "קומה",
+    "revenue": "הכנסות",
+    "unitsBySize": "יחידות לפי גודל",
+    "activeCustomers": "לקוחות פעילים",
+    "paymentSuccess": "הצלחת תשלומים",
+    "paidPayments": "תשלומים שולמו",
+    "contractsExpiringSoon": "חוזים שפגים בקרוב",
+    "expiresSoon": "פג בקרוב",
+    "topPerformingUnits": "יחידות מובילות",
+    "avgContractValue": "ערך חוזה ממוצע",
+    "pendingContracts": "חוזים ממתינים",
+    "generatedOn": "נוצר בתאריך",
+    "at": "בשעה",
+    "reportPeriod": "תקופת הדוח",
+    "units": "יחידות"
   },
   "notifications": {
     "title": "התראות",
