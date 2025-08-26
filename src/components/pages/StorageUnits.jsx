@@ -449,7 +449,7 @@ const StorageUnits = () => {
                       'default'
                     }
                   >
-                    {unit.status}
+                    {t(`units.${unit.status}`)}
                   </Badge>
                 </div>
 
@@ -528,7 +528,7 @@ const StorageUnits = () => {
                           'default'
                         }
                       >
-                        {unit.status}
+                        {t(`units.${unit.status}`)}
                       </Badge>
                     </td>
                     <td className="py-3 px-4">
