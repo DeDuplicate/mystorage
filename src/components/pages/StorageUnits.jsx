@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { useAppContext } from '../../context/AppContext';
 import {
   Plus,
   Edit2,
@@ -24,6 +26,9 @@ import Card from '../ui/Card';
 import Badge from '../ui/Badge';
 
 const StorageUnits = () => {
+  const { t } = useTranslation();
+  const { customers, getCustomerById } = useAppContext();
+  
   const [units, setUnits] = useState([]);
   const [filteredUnits, setFilteredUnits] = useState([]);
   const [selectedFloor, setSelectedFloor] = useState('all');
@@ -38,6 +43,7 @@ const StorageUnits = () => {
     size: '5x5',
     monthly_rate: 50,
     status: 'available',
+    customer_id: '',
     customer_name: '',
     customer_phone: '',
     customer_email: '',
@@ -192,12 +198,26 @@ const StorageUnits = () => {
     if (name === 'status' && value === 'available') {
       setFormData(prev => ({
         ...prev,
+        customer_id: '',
         customer_name: '',
         customer_phone: '',
         customer_email: '',
         rental_start: '',
         rental_end: ''
       }));
+    }
+    
+    // Auto-fill customer information when customer is selected
+    if (name === 'customer_id' && value) {
+      const customer = getCustomerById(parseInt(value));
+      if (customer) {
+        setFormData(prev => ({
+          ...prev,
+          customer_name: customer.name,
+          customer_phone: customer.phone,
+          customer_email: customer.email
+        }));
+      }
     }
   };
 
@@ -248,7 +268,7 @@ const StorageUnits = () => {
 
   // Delete unit
   const handleDelete = (unitId) => {
-    if (window.confirm('Are you sure you want to delete this unit?')) {
+    if (window.confirm(t('units.confirmDelete'))) {
       setUnits(prev => prev.filter(unit => unit.id !== unitId));
     }
   };
@@ -274,8 +294,8 @@ const StorageUnits = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold gradient-text mb-2">Storage Units</h1>
-        <p className="text-gray-600">Manage your storage units and rentals</p>
+        <h1 className="text-4xl font-bold gradient-text mb-2">{t('units.title')}</h1>
+        <p className="text-gray-600">{t('units.subtitle')}</p>
       </div>
 
       {/* Statistics */}
@@ -283,50 +303,50 @@ const StorageUnits = () => {
         <Card className="text-center">
           <Package className="w-8 h-8 mx-auto mb-2 text-primary-500" />
           <p className="text-2xl font-bold">{stats.total}</p>
-          <p className="text-xs text-gray-600">Total Units</p>
+          <p className="text-xs text-gray-600">{t('dashboard.totalUnits')}</p>
         </Card>
 
         <Card className="text-center">
           <Check className="w-8 h-8 mx-auto mb-2 text-success-500" />
           <p className="text-2xl font-bold">{stats.available}</p>
-          <p className="text-xs text-gray-600">Available</p>
+          <p className="text-xs text-gray-600">{t('units.available')}</p>
         </Card>
 
         <Card className="text-center">
           <Home className="w-8 h-8 mx-auto mb-2 text-blue-500" />
           <p className="text-2xl font-bold">{stats.occupied}</p>
-          <p className="text-xs text-gray-600">Occupied</p>
+          <p className="text-xs text-gray-600">{t('units.occupied')}</p>
         </Card>
 
         <Card className="text-center">
           <AlertCircle className="w-8 h-8 mx-auto mb-2 text-warning-500" />
           <p className="text-2xl font-bold">{stats.maintenance}</p>
-          <p className="text-xs text-gray-600">Maintenance</p>
+          <p className="text-xs text-gray-600">{t('units.maintenance')}</p>
         </Card>
 
         <Card className="text-center">
           <Calendar className="w-8 h-8 mx-auto mb-2 text-purple-500" />
           <p className="text-2xl font-bold">{stats.reserved}</p>
-          <p className="text-xs text-gray-600">Reserved</p>
+          <p className="text-xs text-gray-600">{t('units.reserved')}</p>
         </Card>
 
         <Card className="text-center">
           <Layers className="w-8 h-8 mx-auto mb-2 text-gray-500" />
           <p className="text-2xl font-bold">{stats.floor1}/{stats.floor2}</p>
-          <p className="text-xs text-gray-600">Floor 1/2</p>
+          <p className="text-xs text-gray-600">{t('units.floor')} 1/2</p>
         </Card>
 
         <Card className="text-center">
           <DollarSign className="w-8 h-8 mx-auto mb-2 text-success-600" />
           <p className="text-2xl font-bold">${stats.monthlyRevenue}</p>
-          <p className="text-xs text-gray-600">Monthly</p>
+          <p className="text-xs text-gray-600">{t('reports.monthlyRevenue')}</p>
         </Card>
 
         <Card className="text-center">
           <div className="w-8 h-8 mx-auto mb-2 flex items-center justify-center">
             <span className="text-2xl font-bold text-primary-600">{stats.occupancyRate}%</span>
           </div>
-          <p className="text-xs text-gray-600">Occupancy</p>
+          <p className="text-xs text-gray-600">{t('dashboard.occupancyRate')}</p>
         </Card>
       </div>
 
@@ -338,7 +358,7 @@ const StorageUnits = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search unit or customer..."
+              placeholder={t('common.search') + '...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-64 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -351,9 +371,9 @@ const StorageUnits = () => {
             onChange={(e) => setSelectedFloor(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Floors</option>
-            <option value="1">Floor 1</option>
-            <option value="2">Floor 2</option>
+            <option value="all">{t('common.all')} {t('units.floor')}</option>
+            <option value="1">{t('units.floor')} 1</option>
+            <option value="2">{t('units.floor')} 2</option>
           </select>
 
           {/* Status Filter */}
@@ -362,11 +382,11 @@ const StorageUnits = () => {
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Status</option>
-            <option value="available">Available</option>
-            <option value="occupied">Occupied</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="reserved">Reserved</option>
+            <option value="all">{t('common.all')} {t('common.status')}</option>
+            <option value="available">{t('units.available')}</option>
+            <option value="occupied">{t('units.occupied')}</option>
+            <option value="maintenance">{t('units.maintenance')}</option>
+            <option value="reserved">{t('units.reserved')}</option>
           </select>
 
           {/* View Mode */}
@@ -400,7 +420,7 @@ const StorageUnits = () => {
           onClick={() => setShowAddModal(true)}
         >
           <Plus className="w-5 h-5 mr-2" />
-          Add Unit
+          {t('units.addUnit')}
         </Button>
       </div>
 
@@ -418,7 +438,7 @@ const StorageUnits = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="font-bold text-xl">{unit.unit_number}</h3>
-                    <p className="text-sm text-gray-500">Floor {unit.floor}</p>
+                    <p className="text-sm text-gray-500">{t('units.floor')} {unit.floor}</p>
                   </div>
                   <Badge
                     variant={
@@ -434,11 +454,11 @@ const StorageUnits = () => {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Size:</span>
+                    <span className="text-gray-600">{t('units.size')}:</span>
                     <span className="font-medium">{unit.size} ft</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Rate:</span>
+                    <span className="text-gray-600">{t('units.monthlyRate')}:</span>
                     <span className="font-bold text-primary-600">${unit.monthly_rate}/mo</span>
                   </div>
                   {unit.customer_name && (
@@ -462,7 +482,7 @@ const StorageUnits = () => {
                     className="flex-1 p-2 text-primary-500 hover:bg-primary-50 rounded-lg transition-colors text-sm"
                   >
                     <Edit2 className="w-4 h-4 inline mr-1" />
-                    Edit
+                    {t('common.edit')}
                   </button>
                   <button
                     onClick={() => handleDelete(unit.id)}
@@ -481,14 +501,14 @@ const StorageUnits = () => {
             <table className="w-full">
               <thead className="border-b">
                 <tr>
-                  <th className="text-left py-3 px-4">Unit #</th>
-                  <th className="text-left py-3 px-4">Floor</th>
-                  <th className="text-left py-3 px-4">Size</th>
-                  <th className="text-left py-3 px-4">Rate</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-left py-3 px-4">Customer</th>
-                  <th className="text-left py-3 px-4">End Date</th>
-                  <th className="text-center py-3 px-4">Actions</th>
+                  <th className="text-left py-3 px-4">{t('units.unitNumber')}</th>
+                  <th className="text-left py-3 px-4">{t('units.floor')}</th>
+                  <th className="text-left py-3 px-4">{t('units.size')}</th>
+                  <th className="text-left py-3 px-4">{t('units.monthlyRate')}</th>
+                  <th className="text-left py-3 px-4">{t('common.status')}</th>
+                  <th className="text-left py-3 px-4">{t('units.customer')}</th>
+                  <th className="text-left py-3 px-4">{t('contracts.endDate')}</th>
+                  <th className="text-center py-3 px-4">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -564,7 +584,7 @@ const StorageUnits = () => {
             >
               <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">
-                  {editingUnit ? 'Edit Unit' : 'Add New Unit'}
+                  {editingUnit ? t('units.editUnit') : t('units.addUnit')}
                 </h2>
                 <button
                   onClick={() => {
@@ -581,12 +601,12 @@ const StorageUnits = () => {
                 <div className="grid grid-cols-2 gap-6">
                   {/* Unit Information */}
                   <div>
-                    <h3 className="font-semibold mb-4">Unit Information</h3>
+                    <h3 className="font-semibold mb-4">{t('units.unitDetails')}</h3>
                     
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Unit Number *
+                          {t('units.unitNumber')} *
                         </label>
                         <input
                           type="text"
@@ -601,7 +621,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Floor *
+                          {t('units.floor')} *
                         </label>
                         <select
                           name="floor"
@@ -609,14 +629,14 @@ const StorageUnits = () => {
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value={1}>Floor 1</option>
-                          <option value={2}>Floor 2</option>
+                          <option value={1}>{t('units.floor')} 1</option>
+                          <option value={2}>{t('units.floor')} 2</option>
                         </select>
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Size *
+                          {t('units.size')} *
                         </label>
                         <select
                           name="size"
@@ -634,7 +654,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Monthly Rate ($) *
+                          {t('units.monthlyRate')} ($) *
                         </label>
                         <input
                           type="number"
@@ -650,7 +670,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Status *
+                          {t('common.status')} *
                         </label>
                         <select
                           name="status"
@@ -658,10 +678,10 @@ const StorageUnits = () => {
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="available">Available</option>
-                          <option value="occupied">Occupied</option>
-                          <option value="maintenance">Maintenance</option>
-                          <option value="reserved">Reserved</option>
+                          <option value="available">{t('units.available')}</option>
+                          <option value="occupied">{t('units.occupied')}</option>
+                          <option value="maintenance">{t('units.maintenance')}</option>
+                          <option value="reserved">{t('units.reserved')}</option>
                         </select>
                       </div>
                     </div>
@@ -670,7 +690,7 @@ const StorageUnits = () => {
                   {/* Customer Information */}
                   <div>
                     <h3 className="font-semibold mb-4">
-                      Customer Information 
+                      {t('customers.contactInfo')} 
                       {formData.status === 'available' && (
                         <span className="text-sm font-normal text-gray-500 ml-2">
                           (Not required for available units)
@@ -681,7 +701,7 @@ const StorageUnits = () => {
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Select Customer
+                          {t('units.assignCustomer')}
                         </label>
                         <select
                           name="customer_id"
@@ -690,7 +710,7 @@ const StorageUnits = () => {
                           disabled={formData.status === 'available'}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50"
                         >
-                          <option value="">Select a customer</option>
+                          <option value="">{t('units.assignCustomer')}</option>
                           {customers.map(customer => (
                             <option key={customer.id} value={customer.id}>
                               {customer.name} - {customer.phone}
@@ -701,7 +721,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Customer Name
+                          {t('customers.customerName')}
                         </label>
                         <input
                           type="text"
@@ -717,7 +737,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Phone
+                          {t('customers.phone')}
                         </label>
                         <input
                           type="tel"
@@ -733,7 +753,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Email
+                          {t('customers.email')}
                         </label>
                         <input
                           type="email"
@@ -749,7 +769,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Rental Start Date
+                          {t('contracts.startDate')}
                         </label>
                         <input
                           type="date"
@@ -763,7 +783,7 @@ const StorageUnits = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Rental End Date
+                          {t('contracts.endDate')}
                         </label>
                         <input
                           type="date"
@@ -781,7 +801,7 @@ const StorageUnits = () => {
                 {/* Notes */}
                 <div className="mt-6">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes
+                    {t('units.notes')}
                   </label>
                   <textarea
                     name="notes"
@@ -803,11 +823,11 @@ const StorageUnits = () => {
                       setEditingUnit(null);
                     }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" variant="gradient">
                     <Save className="w-5 h-5 mr-2" />
-                    {editingUnit ? 'Update Unit' : 'Add Unit'}
+                    {editingUnit ? t('common.save') : t('units.addUnit')}
                   </Button>
                 </div>
               </form>
