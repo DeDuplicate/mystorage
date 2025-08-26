@@ -77,10 +77,41 @@ const Dashboard = () => {
   ];
 
   const recentActivities = [
-    { id: 1, type: 'payment', message: 'Payment received from John Doe', amount: '$250', time: '2 hours ago', status: 'success' },
-    { id: 2, type: 'contract', message: 'New contract signed - Unit A-105', customer: 'Jane Smith', time: '4 hours ago', status: 'new' },
-    { id: 3, type: 'alert', message: 'Payment overdue - Unit B-203', customer: 'Mike Johnson', time: '6 hours ago', status: 'warning' },
-    { id: 4, type: 'maintenance', message: 'Maintenance completed - Unit C-101', time: '1 day ago', status: 'info' },
+    { 
+      id: 1, 
+      type: 'payment', 
+      messageKey: 'dashboard.activities.paymentReceived',
+      messageData: { customer: 'John Doe' },
+      amount: '$250', 
+      time: t('common.hoursAgo', { count: 2 }), 
+      status: 'success' 
+    },
+    { 
+      id: 2, 
+      type: 'contract', 
+      messageKey: 'dashboard.activities.contractSigned',
+      messageData: { unit: 'A-105' },
+      customer: 'Jane Smith', 
+      time: t('common.hoursAgo', { count: 4 }), 
+      status: 'new' 
+    },
+    { 
+      id: 3, 
+      type: 'alert', 
+      messageKey: 'dashboard.activities.paymentOverdue',
+      messageData: { unit: 'B-203' },
+      customer: 'Mike Johnson', 
+      time: t('common.hoursAgo', { count: 6 }), 
+      status: 'warning' 
+    },
+    { 
+      id: 4, 
+      type: 'maintenance', 
+      messageKey: 'dashboard.activities.maintenanceCompleted',
+      messageData: { unit: 'C-101' },
+      time: t('common.daysAgo', { count: 1 }), 
+      status: 'info' 
+    },
   ];
 
   const upcomingExpirations = [
@@ -268,7 +299,9 @@ const Dashboard = () => {
                     activity.status === 'new' ? 'bg-blue-500' : 'bg-gray-500'
                   }`} />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {t(activity.messageKey, activity.messageData)}
+                    </p>
                     {activity.customer && (
                       <p className="text-xs text-gray-500">{activity.customer}</p>
                     )}

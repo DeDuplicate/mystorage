@@ -31,7 +31,10 @@
     "systemOnline": "המערכת פעילה",
     "all": "הכל",
     "soon": "בקרוב",
-    "days": "ימים"
+    "days": "ימים",
+    "hoursAgo": "לפני {{count}} שעות",
+    "daysAgo": "לפני יום",
+    "daysAgo_plural": "לפני {{count}} ימים"
   },
   "navigation": {
     "dashboard": "לוח בקרה",
@@ -60,7 +63,13 @@
     "monthlyRevenue": "הכנסות חודשיות",
     "availableUnits": "יחידות פנויות",
     "totalUnits": "סה״כ יחידות",
-    "newCustomers": "לקוחות חדשים החודש"
+    "newCustomers": "לקוחות חדשים החודש",
+    "activities": {
+      "paymentReceived": "התקבל תשלום מ-{{customer}}",
+      "contractSigned": "חוזה חדש נחתם - יחידה {{unit}}",
+      "paymentOverdue": "תשלום באיחור - יחידה {{unit}}",
+      "maintenanceCompleted": "תחזוקה הושלמה - יחידה {{unit}}"
+    }
   },
   "units": {
     "title": "יחידות אחסון",
