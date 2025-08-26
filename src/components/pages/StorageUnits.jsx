@@ -41,8 +41,11 @@ const StorageUnits = () => {
   const [formData, setFormData] = useState({
     unit_number: '',
     floor: 1,
-    size: '5x5',
+    size: 25, // Now storing square footage directly
+    size_preset: '', // Selected preset ID
+    use_custom_size: false,
     monthly_rate: 50,
+    rent_calculation_mode: 'manual', // 'manual' or 'calculated'
     status: 'available',
     customer_id: '',
     customer_name: '',
@@ -53,13 +56,66 @@ const StorageUnits = () => {
     notes: ''
   });
 
-  // Unit size templates with default prices
-  const unitSizes = {
-    '5x5': { label: t('units.sizeSmall'), sqft: 25, defaultPrice: 50 },
-    '5x10': { label: t('units.sizeMedium'), sqft: 50, defaultPrice: 75 },
-    '10x10': { label: t('units.sizeLarge'), sqft: 100, defaultPrice: 100 },
-    '10x15': { label: t('units.sizeXL'), sqft: 150, defaultPrice: 150 },
-    '10x20': { label: t('units.sizeXXL'), sqft: 200, defaultPrice: 200 }
+  // Load unit size presets from localStorage (from Settings)
+  const [unitSizePresets, setUnitSizePresets] = useState([
+    { id: 1, name: 'Small', size: 25, rentPerSqFt: 1.2 },
+    { id: 2, name: 'Medium', size: 50, rentPerSqFt: 1.0 },
+    { id: 3, name: 'Large', size: 100, rentPerSqFt: 0.9 },
+    { id: 4, name: 'Extra Large', size: 200, rentPerSqFt: 0.8 }
+  ]);
+
+  // Load presets from settings
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('storageSettings');
+    if (savedSettings) {
+      try {
+        const settings = JSON.parse(savedSettings);
+        if (settings.unitSizes && settings.unitSizes.presets) {
+          setUnitSizePresets(settings.unitSizes.presets);
+        }
+      } catch (error) {
+        console.log('Error loading unit size presets:', error);
+      }
+    }
+  }, []);
+
+  // Handle preset size selection
+  const handlePresetChange = (presetId) => {
+    const preset = unitSizePresets.find(p => p.id === parseInt(presetId));
+    if (preset) {
+      setFormData(prev => ({
+        ...prev,
+        size_preset: presetId,
+        size: preset.size,
+        monthly_rate: formData.rent_calculation_mode === 'calculated' ? preset.size * preset.rentPerSqFt : prev.monthly_rate,
+        use_custom_size: false
+      }));
+    } else {
+      // Custom size selected
+      setFormData(prev => ({
+        ...prev,
+        size_preset: '',
+        use_custom_size: true
+      }));
+    }
+  };
+
+  // Handle rent calculation mode change
+  const handleRentCalculationModeChange = (mode) => {
+    setFormData(prev => {
+      let newRate = prev.monthly_rate;
+      if (mode === 'calculated' && prev.size_preset) {
+        const preset = unitSizePresets.find(p => p.id === parseInt(prev.size_preset));
+        if (preset) {
+          newRate = prev.size * preset.rentPerSqFt;
+        }
+      }
+      return {
+        ...prev,
+        rent_calculation_mode: mode,
+        monthly_rate: newRate
+      };
+    });
   };
 
   // Initialize with sample data
@@ -69,7 +125,7 @@ const StorageUnits = () => {
         id: 1,
         unit_number: 'A101',
         floor: 1,
-        size: '5x5',
+        size: 25,
         monthly_rate: 50,
         status: 'occupied',
         customer_name: 'John Doe',
@@ -83,7 +139,7 @@ const StorageUnits = () => {
         id: 2,
         unit_number: 'A102',
         floor: 1,
-        size: '5x10',
+        size: 50,
         monthly_rate: 75,
         status: 'available',
         customer_name: '',
@@ -97,7 +153,7 @@ const StorageUnits = () => {
         id: 3,
         unit_number: 'A103',
         floor: 1,
-        size: '10x10',
+        size: 100,
         monthly_rate: 100,
         status: 'occupied',
         customer_name: 'Sarah Johnson',
@@ -111,7 +167,7 @@ const StorageUnits = () => {
         id: 4,
         unit_number: 'B201',
         floor: 2,
-        size: '10x15',
+        size: 150,
         monthly_rate: 150,
         status: 'available',
         customer_name: '',
@@ -139,7 +195,7 @@ const StorageUnits = () => {
         id: 6,
         unit_number: 'A104',
         floor: 1,
-        size: '10x20',
+        size: 200,
         monthly_rate: 200,
         status: 'reserved',
         customer_name: 'Mike Brown',
@@ -635,38 +691,97 @@ const StorageUnits = () => {
                         </select>
                       </div>
 
+                      {/* Unit Size Selection */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           {t('units.size')} *
                         </label>
                         <select
-                          name="size"
-                          value={formData.size}
-                          onChange={handleInputChange}
+                          name="size_preset"
+                          value={formData.size_preset}
+                          onChange={(e) => handlePresetChange(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          {Object.entries(unitSizes).map(([value, info]) => (
-                            <option key={value} value={value}>
-                              {info.label} - {formatCurrency(info.defaultPrice)}/{t('common.month') || 'mo'}
+                          <option value="">{t('settings.selectPresetSize')}</option>
+                          {unitSizePresets.map((preset) => (
+                            <option key={preset.id} value={preset.id}>
+                              {preset.name} - {preset.size} sq ft - {getCurrencySymbol()}{preset.rentPerSqFt}/sq ft
                             </option>
                           ))}
+                          <option value="custom">{t('settings.customSize')}</option>
                         </select>
+                        {formData.size_preset && formData.size_preset !== 'custom' && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {t('settings.orEnterCustom')}
+                          </p>
+                        )}
                       </div>
 
+                      {/* Custom Size Input */}
+                      {(formData.use_custom_size || formData.size_preset === 'custom') && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('settings.customSize')} (sq ft) *
+                          </label>
+                          <input
+                            type="number"
+                            name="size"
+                            value={formData.size}
+                            onChange={(e) => setFormData(prev => ({...prev, size: parseFloat(e.target.value) || 0}))}
+                            min="1"
+                            required
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder="Enter size in square feet"
+                          />
+                        </div>
+                      )}
+
+                      {/* Rent Calculation */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('units.monthlyRate')} ({getCurrencySymbol()}) *
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-sm font-medium text-gray-700">
+                            {t('units.monthlyRate')} ({getCurrencySymbol()}) *
+                          </label>
+                          <div className="flex items-center text-xs">
+                            <input
+                              type="radio"
+                              id="manual"
+                              name="rent_calculation_mode"
+                              value="manual"
+                              checked={formData.rent_calculation_mode === 'manual'}
+                              onChange={(e) => handleRentCalculationModeChange(e.target.value)}
+                              className="mr-1"
+                            />
+                            <label htmlFor="manual" className="mr-3">{t('settings.manualOverride')}</label>
+                            <input
+                              type="radio"
+                              id="calculated"
+                              name="rent_calculation_mode"
+                              value="calculated"
+                              checked={formData.rent_calculation_mode === 'calculated'}
+                              onChange={(e) => handleRentCalculationModeChange(e.target.value)}
+                              className="mr-1"
+                              disabled={!formData.size_preset || formData.size_preset === 'custom'}
+                            />
+                            <label htmlFor="calculated" className="text-xs">{t('settings.calculateFromRate')}</label>
+                          </div>
+                        </div>
                         <input
                           type="number"
                           name="monthly_rate"
                           value={formData.monthly_rate}
-                          onChange={handleInputChange}
+                          onChange={(e) => setFormData(prev => ({...prev, monthly_rate: parseFloat(e.target.value) || 0}))}
                           required
                           min="0"
                           step="0.01"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          disabled={formData.rent_calculation_mode === 'calculated' && formData.size_preset && formData.size_preset !== 'custom'}
                         />
+                        {formData.rent_calculation_mode === 'calculated' && formData.size_preset && formData.size_preset !== 'custom' && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {t('settings.basedOnSize')}: {formData.size} sq ft × {getCurrencySymbol()}{unitSizePresets.find(p => p.id === parseInt(formData.size_preset))?.rentPerSqFt}/sq ft
+                          </p>
+                        )}
                       </div>
 
                       <div>

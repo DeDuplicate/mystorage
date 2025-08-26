@@ -48,6 +48,16 @@ const Contracts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingContract, setEditingContract] = useState(null);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState([]);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [templateFormData, setTemplateFormData] = useState({
+    name: '',
+    description: '',
+    terms: '',
+    contract_type: 'rental',
+    duration_months: 12
+  });
   const [formData, setFormData] = useState({
     customer_id: '',
     unit_id: '',
@@ -62,8 +72,55 @@ const Contracts = () => {
     terms: '',
     notes: '',
     auto_renew: false,
-    files: []
+    files: [],
+    selected_template: ''
   });
+
+  // Contract templates
+  const contractTemplates = {
+    standard: {
+      name: t('contracts.templates.standard.name'),
+      description: t('contracts.templates.standard.description'),
+      terms: t('contracts.templates.standard.terms'),
+      contract_type: 'rental',
+      duration_months: 12
+    },
+    monthToMonth: {
+      name: t('contracts.templates.monthToMonth.name'),
+      description: t('contracts.templates.monthToMonth.description'),
+      terms: t('contracts.templates.monthToMonth.terms'),
+      contract_type: 'month-to-month',
+      duration_months: 1
+    },
+    longTerm: {
+      name: t('contracts.templates.longTerm.name'),
+      description: t('contracts.templates.longTerm.description'),
+      terms: t('contracts.templates.longTerm.terms'),
+      contract_type: 'annual',
+      duration_months: 24
+    },
+    business: {
+      name: t('contracts.templates.business.name'),
+      description: t('contracts.templates.business.description'),
+      terms: t('contracts.templates.business.terms'),
+      contract_type: 'rental',
+      duration_months: 12
+    },
+    climateControlled: {
+      name: t('contracts.templates.climateControlled.name'),
+      description: t('contracts.templates.climateControlled.description'),
+      terms: t('contracts.templates.climateControlled.terms'),
+      contract_type: 'rental',
+      duration_months: 12
+    },
+    vehicle: {
+      name: t('contracts.templates.vehicle.name'),
+      description: t('contracts.templates.vehicle.description'),
+      terms: t('contracts.templates.vehicle.terms'),
+      contract_type: 'rental',
+      duration_months: 6
+    }
+  };
 
   // Contract statuses
   const contractStatuses = {
@@ -79,6 +136,19 @@ const Contracts = () => {
   useEffect(() => {
     setFilteredContracts(contracts);
   }, [contracts]);
+
+  // Load custom templates from localStorage
+  useEffect(() => {
+    const savedTemplates = localStorage.getItem('customContractTemplates');
+    if (savedTemplates) {
+      setCustomTemplates(JSON.parse(savedTemplates));
+    }
+  }, []);
+
+  // Save custom templates to localStorage
+  const saveCustomTemplatesToStorage = (templates) => {
+    localStorage.setItem('customContractTemplates', JSON.stringify(templates));
+  };
 
   // Filter contracts
   useEffect(() => {
@@ -111,14 +181,20 @@ const Contracts = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
 
-    // Auto-generate contract number when customer is selected
+    // Auto-generate contract number and set default dates when customer is selected
     if (name === 'customer_id' && value) {
       const customer = getCustomerById(parseInt(value));
       if (customer && !editingContract) {
         const nextNumber = String(contracts.length + 1).padStart(3, '0');
+        const today = new Date();
+        const defaultEndDate = new Date(today);
+        defaultEndDate.setFullYear(today.getFullYear() + 1); // Default 1 year contract
+        
         setFormData(prev => ({
           ...prev,
-          contract_number: `CNT-2024-${nextNumber}`
+          contract_number: `CNT-2024-${nextNumber}`,
+          start_date: today.toISOString().split('T')[0],
+          end_date: defaultEndDate.toISOString().split('T')[0]
         }));
       }
     }
@@ -132,7 +208,32 @@ const Contracts = () => {
           unit_number: unit.unit_number,
           monthly_rate: unit.monthly_rate,
           security_deposit: unit.monthly_rate, // Default to same as monthly rate
-          terms: t('contracts.standardAgreement', { unitNumber: unit.unit_number, size: unit.size })
+          terms: prev.terms || t('contracts.standardAgreement', { unitNumber: unit.unit_number, size: unit.size })
+        }));
+      }
+    }
+
+    // Handle template selection
+    if (name === 'selected_template' && value) {
+      // Check both predefined and custom templates
+      const template = contractTemplates[value] || customTemplates.find(t => t.id === value);
+      if (template) {
+        // Calculate end date based on template duration and start date
+        let endDate = '';
+        if (formData.start_date) {
+          const startDate = new Date(formData.start_date);
+          const calculatedEndDate = new Date(startDate);
+          calculatedEndDate.setMonth(calculatedEndDate.getMonth() + template.duration_months);
+          endDate = calculatedEndDate.toISOString().split('T')[0];
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          selected_template: value,
+          contract_type: template.contract_type,
+          terms: template.terms,
+          end_date: endDate || prev.end_date,
+          notes: prev.notes ? `${prev.notes}\n\nTemplate: ${template.name}` : `Template: ${template.name}`
         }));
       }
     }
@@ -162,6 +263,138 @@ const Contracts = () => {
       ...prev,
       files: prev.files.filter(file => file.id !== fileId)
     }));
+  };
+
+  // Auto-fill customer information
+  const autoFillCustomerInfo = () => {
+    const customer = getCustomerById(parseInt(formData.customer_id));
+    if (customer && formData.unit_id) {
+      const unit = getUnitById(parseInt(formData.unit_id));
+      if (unit) {
+        const personalizedTerms = formData.terms.replace(/\[CUSTOMER_NAME\]/g, customer.name)
+                                                .replace(/\[CUSTOMER_PHONE\]/g, customer.phone)
+                                                .replace(/\[CUSTOMER_EMAIL\]/g, customer.email)
+                                                .replace(/\[UNIT_NUMBER\]/g, unit.unit_number)
+                                                .replace(/\[UNIT_SIZE\]/g, unit.size);
+        
+        setFormData(prev => ({
+          ...prev,
+          terms: personalizedTerms,
+          notes: prev.notes + `\n\nAuto-filled: ${new Date().toLocaleDateString()} - Customer: ${customer.name}, Unit: ${unit.unit_number}`
+        }));
+      }
+    }
+  };
+
+  // Template management functions
+  const handleTemplateFormChange = (e) => {
+    const { name, value, type } = e.target;
+    setTemplateFormData(prev => ({
+      ...prev,
+      [name]: type === 'number' ? parseInt(value) : value
+    }));
+  };
+
+  const validateTemplate = (templateData) => {
+    if (!templateData.name.trim()) {
+      alert(t('contracts.templateNameRequired'));
+      return false;
+    }
+    if (!templateData.terms.trim()) {
+      alert(t('contracts.templateTermsRequired'));
+      return false;
+    }
+    
+    // Check for duplicate names (excluding current template when editing)
+    const existingTemplate = customTemplates.find(template => 
+      template.name.toLowerCase() === templateData.name.toLowerCase().trim() && 
+      (!editingTemplate || template.id !== editingTemplate.id)
+    );
+    
+    if (existingTemplate) {
+      alert(t('contracts.duplicateTemplateName'));
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleSaveTemplate = () => {
+    if (!validateTemplate(templateFormData)) return;
+    
+    const templateToSave = {
+      ...templateFormData,
+      name: templateFormData.name.trim(),
+      id: editingTemplate?.id || `custom_${Date.now()}`,
+      created_date: editingTemplate?.created_date || new Date().toISOString(),
+      updated_date: new Date().toISOString(),
+      is_custom: true
+    };
+
+    let updatedTemplates;
+    if (editingTemplate) {
+      // Update existing template
+      updatedTemplates = customTemplates.map(template =>
+        template.id === editingTemplate.id ? templateToSave : template
+      );
+    } else {
+      // Add new template
+      updatedTemplates = [...customTemplates, templateToSave];
+    }
+
+    setCustomTemplates(updatedTemplates);
+    saveCustomTemplatesToStorage(updatedTemplates);
+    
+    // Reset form and close modal
+    setTemplateFormData({
+      name: '',
+      description: '',
+      terms: '',
+      contract_type: 'rental',
+      duration_months: 12
+    });
+    setEditingTemplate(null);
+    setShowTemplateManager(false);
+    
+    alert(t('contracts.templateSaved'));
+  };
+
+  const handleEditTemplate = (template) => {
+    setEditingTemplate(template);
+    setTemplateFormData({
+      name: template.name,
+      description: template.description,
+      terms: template.terms,
+      contract_type: template.contract_type,
+      duration_months: template.duration_months
+    });
+    setShowTemplateManager(true);
+  };
+
+  const handleDeleteTemplate = (templateId) => {
+    if (window.confirm(t('contracts.confirmDeleteTemplate'))) {
+      const updatedTemplates = customTemplates.filter(template => template.id !== templateId);
+      setCustomTemplates(updatedTemplates);
+      saveCustomTemplatesToStorage(updatedTemplates);
+      alert(t('contracts.templateDeleted'));
+    }
+  };
+
+  const saveCurrentAsTemplate = () => {
+    if (!formData.terms.trim()) {
+      alert(t('contracts.templateTermsRequired'));
+      return;
+    }
+    
+    setTemplateFormData({
+      name: '',
+      description: `Template created from contract ${formData.contract_number || 'draft'}`,
+      terms: formData.terms,
+      contract_type: formData.contract_type,
+      duration_months: 12
+    });
+    setEditingTemplate(null);
+    setShowTemplateManager(true);
   };
 
   // Add or update contract
@@ -222,7 +455,8 @@ const Contracts = () => {
       terms: '',
       notes: '',
       auto_renew: false,
-      files: []
+      files: [],
+      selected_template: ''
     });
   };
 
@@ -231,7 +465,8 @@ const Contracts = () => {
     setEditingContract(contract);
     setFormData({
       ...contract,
-      files: contract.files || []
+      files: contract.files || [],
+      selected_template: contract.selected_template || ''
     });
     setShowAddModal(true);
   };
@@ -518,6 +753,69 @@ const Contracts = () => {
                         </select>
                       </div>
 
+                      {/* Contract Template Selector */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-sm font-medium text-gray-700">
+                            {t('contracts.contractTemplates')}
+                          </label>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowTemplateManager(true)}
+                              className="text-xs"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              {t('contracts.manageTemplates')}
+                            </Button>
+                            {formData.terms && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={saveCurrentAsTemplate}
+                                className="text-xs"
+                              >
+                                <Save className="w-3 h-3 mr-1" />
+                                {t('contracts.saveAsTemplate')}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        <select
+                          name="selected_template"
+                          value={formData.selected_template}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                          <option value="">{t('contracts.noTemplate')}</option>
+                          <optgroup label={t('contracts.predefinedTemplates')}>
+                            {Object.entries(contractTemplates).map(([key, template]) => (
+                              <option key={key} value={key}>
+                                {template.name}
+                              </option>
+                            ))}
+                          </optgroup>
+                          {customTemplates.length > 0 && (
+                            <optgroup label={t('contracts.customTemplates')}>
+                              {customTemplates.map(template => (
+                                <option key={template.id} value={template.id}>
+                                  {template.name}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                        </select>
+                        {formData.selected_template && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {contractTemplates[formData.selected_template]?.description || 
+                             customTemplates.find(t => t.id === formData.selected_template)?.description}
+                          </p>
+                        )}
+                      </div>
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           {t('contracts.contractNumber')} *
@@ -754,9 +1052,23 @@ const Contracts = () => {
                     {/* Terms Section */}
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t('contracts.contractTerms')}
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-sm font-medium text-gray-700">
+                            {t('contracts.contractTerms')}
+                          </label>
+                          {formData.customer_id && formData.unit_id && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={autoFillCustomerInfo}
+                              className="text-xs"
+                            >
+                              <User className="w-3 h-3 mr-1" />
+                              {t('contracts.autoFillFromTemplate')}
+                            </Button>
+                          )}
+                        </div>
                         <textarea
                           name="terms"
                           value={formData.terms}
@@ -802,6 +1114,249 @@ const Contracts = () => {
                   </Button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Template Manager Modal */}
+      <AnimatePresence>
+        {showTemplateManager && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => {
+              setShowTemplateManager(false);
+              setEditingTemplate(null);
+              setTemplateFormData({
+                name: '',
+                description: '',
+                terms: '',
+                contract_type: 'rental',
+                duration_months: 12
+              });
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                <h2 className="text-2xl font-bold">
+                  {editingTemplate ? t('contracts.editCustomTemplate') : t('contracts.templateLibrary')}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowTemplateManager(false);
+                    setEditingTemplate(null);
+                    setTemplateFormData({
+                      name: '',
+                      description: '',
+                      terms: '',
+                      contract_type: 'rental',
+                      duration_months: 12
+                    });
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="grid grid-cols-12 gap-8">
+                  {/* Left Column - Template Form */}
+                  <div className="col-span-5">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>
+                          {editingTemplate ? t('contracts.editCustomTemplate') : t('contracts.addCustomTemplate')}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('contracts.templateName')} *
+                          </label>
+                          <input
+                            type="text"
+                            name="name"
+                            value={templateFormData.name}
+                            onChange={handleTemplateFormChange}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder={t('contracts.templateName')}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('contracts.templateDescription')}
+                          </label>
+                          <input
+                            type="text"
+                            name="description"
+                            value={templateFormData.description}
+                            onChange={handleTemplateFormChange}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder={t('contracts.templateDescription')}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              {t('contracts.contractType')}
+                            </label>
+                            <select
+                              name="contract_type"
+                              value={templateFormData.contract_type}
+                              onChange={handleTemplateFormChange}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            >
+                              <option value="rental">{t('contracts.rentalAgreement')}</option>
+                              <option value="lease">{t('contracts.leaseAgreement')}</option>
+                              <option value="month-to-month">{t('contracts.monthToMonth')}</option>
+                              <option value="annual">{t('contracts.annualContract')}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              {t('contracts.defaultDuration')}
+                            </label>
+                            <input
+                              type="number"
+                              name="duration_months"
+                              value={templateFormData.duration_months}
+                              onChange={handleTemplateFormChange}
+                              min="1"
+                              max="120"
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('contracts.defaultTerms')} *
+                          </label>
+                          <textarea
+                            name="terms"
+                            value={templateFormData.terms}
+                            onChange={handleTemplateFormChange}
+                            rows="8"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder={t('contracts.enterContractTerms')}
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Use placeholders: [CUSTOMER_NAME], [CUSTOMER_PHONE], [CUSTOMER_EMAIL], [UNIT_NUMBER], [UNIT_SIZE]
+                          </p>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Button
+                            type="button"
+                            variant="gradient"
+                            onClick={handleSaveTemplate}
+                            className="flex-1"
+                          >
+                            <Save className="w-4 h-4 mr-2" />
+                            {editingTemplate ? t('contracts.updateContract') : t('contracts.saveTemplate')}
+                          </Button>
+                          {editingTemplate && (
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={() => {
+                                setEditingTemplate(null);
+                                setTemplateFormData({
+                                  name: '',
+                                  description: '',
+                                  terms: '',
+                                  contract_type: 'rental',
+                                  duration_months: 12
+                                });
+                              }}
+                            >
+                              {t('common.cancel')}
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Right Column - Template List */}
+                  <div className="col-span-7">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{t('contracts.customTemplates')}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {customTemplates.length === 0 ? (
+                          <div className="text-center py-8">
+                            <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                            <p className="text-gray-500 mb-2">{t('contracts.noCustomTemplates')}</p>
+                            <p className="text-sm text-gray-400">{t('contracts.createFirstTemplate')}</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {customTemplates.map((template) => (
+                              <motion.div
+                                key={template.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                                      {template.name}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                      {template.description}
+                                    </p>
+                                    <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                      <span>Type: {template.contract_type}</span>
+                                      <span>Duration: {template.duration_months} months</span>
+                                      <span>Created: {new Date(template.created_date).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="mt-2">
+                                      <p className="text-sm text-gray-700 line-clamp-3">
+                                        {template.terms}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex space-x-2 ml-4">
+                                    <button
+                                      onClick={() => handleEditTemplate(template)}
+                                      className="p-2 text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
+                                      title={t('contracts.editTemplate')}
+                                    >
+                                      <Edit2 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteTemplate(template.id)}
+                                      className="p-2 text-danger-500 hover:bg-danger-50 rounded-lg transition-colors"
+                                      title={t('contracts.deleteTemplate')}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

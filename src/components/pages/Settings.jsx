@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
@@ -42,7 +43,8 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
-  HelpCircle
+  HelpCircle,
+  Grid3x3
 } from 'lucide-react';
 
 const Settings = () => {
@@ -161,6 +163,17 @@ const Settings = () => {
       googleMapsApiKey: '',
       webhookUrl: '',
       apiAccess: false
+    },
+
+    // Unit Size Presets
+    unitSizes: {
+      presets: [
+        { id: 1, name: 'Small', size: 25, rentPerSqFt: 1.2 },
+        { id: 2, name: 'Medium', size: 50, rentPerSqFt: 1.0 },
+        { id: 3, name: 'Large', size: 100, rentPerSqFt: 0.9 },
+        { id: 4, name: 'Extra Large', size: 200, rentPerSqFt: 0.8 }
+      ],
+      nextId: 5
     }
   });
 
@@ -172,6 +185,7 @@ const Settings = () => {
     { id: 'business', label: t('settings.business'), icon: Building, description: t('settings.businessDescription') },
     { id: 'system', label: t('settings.system'), icon: SettingsIcon, description: t('settings.systemDescription') },
     { id: 'pricing', label: t('settings.pricing'), icon: DollarSign, description: t('settings.pricingDescription') },
+    { id: 'unitsizes', label: t('settings.unitSizePresets'), icon: Database, description: 'Manage unit size presets and rent rates' },
     { id: 'notifications', label: t('settings.notifications'), icon: Bell, description: t('settings.notificationsDescription') },
     { id: 'security', label: t('settings.security'), icon: Shield, description: t('settings.securityDescription') },
     { id: 'appearance', label: t('settings.appearance'), icon: Palette, description: t('settings.appearanceDescription') },
@@ -260,6 +274,111 @@ const Settings = () => {
         }
       };
       reader.readAsText(file);
+    }
+  };
+
+  // Unit size preset management state
+  const [editingPreset, setEditingPreset] = useState(null);
+  const [showAddPreset, setShowAddPreset] = useState(false);
+  const [presetFormData, setPresetFormData] = useState({
+    name: '',
+    size: 0,
+    rentPerSqFt: 0
+  });
+
+  // Unit size preset management functions
+  const handlePresetFormChange = (e) => {
+    const { name, value, type } = e.target;
+    setPresetFormData(prev => ({
+      ...prev,
+      [name]: type === 'number' ? parseFloat(value) || 0 : value
+    }));
+  };
+
+  const startAddingPreset = () => {
+    setPresetFormData({ name: '', size: 0, rentPerSqFt: 0 });
+    setEditingPreset(null);
+    setShowAddPreset(true);
+  };
+
+  const startEditingPreset = (preset) => {
+    setPresetFormData({
+      name: preset.name,
+      size: preset.size,
+      rentPerSqFt: preset.rentPerSqFt
+    });
+    setEditingPreset(preset);
+    setShowAddPreset(false);
+  };
+
+  const savePreset = () => {
+    if (!presetFormData.name.trim()) {
+      alert(t('contracts.templateNameRequired'));
+      return;
+    }
+    if (presetFormData.size <= 0) {
+      alert('Size must be greater than 0');
+      return;
+    }
+    if (presetFormData.rentPerSqFt < 0) {
+      alert('Rent per sq ft must be 0 or greater');
+      return;
+    }
+
+    if (editingPreset) {
+      // Update existing preset
+      const updatedPreset = {
+        ...editingPreset,
+        name: presetFormData.name.trim(),
+        size: presetFormData.size,
+        rentPerSqFt: presetFormData.rentPerSqFt
+      };
+      
+      setSettings(prev => ({
+        ...prev,
+        unitSizes: {
+          ...prev.unitSizes,
+          presets: prev.unitSizes.presets.map(p => p.id === editingPreset.id ? updatedPreset : p)
+        }
+      }));
+    } else {
+      // Add new preset
+      const newPreset = {
+        id: settings.unitSizes.nextId,
+        name: presetFormData.name.trim(),
+        size: presetFormData.size,
+        rentPerSqFt: presetFormData.rentPerSqFt
+      };
+      
+      setSettings(prev => ({
+        ...prev,
+        unitSizes: {
+          ...prev.unitSizes,
+          presets: [...prev.unitSizes.presets, newPreset],
+          nextId: prev.unitSizes.nextId + 1
+        }
+      }));
+    }
+    
+    // Reset form
+    cancelPresetEdit();
+  };
+
+  const cancelPresetEdit = () => {
+    setEditingPreset(null);
+    setShowAddPreset(false);
+    setPresetFormData({ name: '', size: 0, rentPerSqFt: 0 });
+  };
+
+  const deleteUnitSizePreset = (presetId) => {
+    if (window.confirm(t('settings.deleteSizePreset') + '?')) {
+      setSettings(prev => ({
+        ...prev,
+        unitSizes: {
+          ...prev.unitSizes,
+          presets: prev.unitSizes.presets.filter(p => p.id !== presetId)
+        }
+      }));
     }
   };
 
@@ -578,7 +697,7 @@ const Settings = () => {
               </div>
               {settings.pricing.defaultSecurityDeposit === 'fixed' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fixed Amount ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.fixedAmount')} ({getCurrencySymbol()})</label>
                   <input
                     type="number"
                     value={settings.pricing.fixedSecurityDeposit}
@@ -626,6 +745,214 @@ const Settings = () => {
     </div>
   );
 
+  // Render unit sizes section
+  const renderUnitSizesSection = () => (
+    <div className="space-y-6">
+      {/* Header Card with Add Button */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>{t('settings.unitSizePresets')}</CardTitle>
+            <p className="text-sm text-gray-600 mt-1">{t('settings.unitSizeConfiguration')}</p>
+          </div>
+          <Button 
+            variant="gradient" 
+            onClick={startAddingPreset} 
+            disabled={showAddPreset}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {t('settings.addSizePreset')}
+          </Button>
+        </CardHeader>
+      </Card>
+
+      {/* Add/Edit Form */}
+      <AnimatePresence>
+        {(showAddPreset || editingPreset) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-white">
+              <CardHeader>
+                <CardTitle className="text-primary-700">
+                  {editingPreset ? t('settings.editSizePreset') : t('settings.addSizePreset')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('settings.sizePresetName')} *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={presetFormData.name}
+                      onChange={handlePresetFormChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder={t('settings.sizeNamePlaceholder')}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('settings.sizeInSqFt')} *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        name="size"
+                        value={presetFormData.size}
+                        onChange={handlePresetFormChange}
+                        min="1"
+                        step="1"
+                        className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        placeholder="25"
+                      />
+                      <span className="absolute right-3 top-2 text-gray-500 text-sm">{t('common.ft')}</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('settings.rentPerSqFt')} *
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2 text-gray-500 text-sm">{getCurrencySymbol()}</span>
+                      <input
+                        type="number"
+                        name="rentPerSqFt"
+                        value={presetFormData.rentPerSqFt}
+                        onChange={handlePresetFormChange}
+                        min="0"
+                        step="0.01"
+                        className="w-full px-4 py-2 pl-8 pr-16 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        placeholder="1.20"
+                      />
+                      <span className="absolute right-3 top-2 text-gray-500 text-sm">{t('common.ft')}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Preview Calculation */}
+                {presetFormData.size > 0 && presetFormData.rentPerSqFt > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mt-4 p-4 bg-white rounded-lg border border-primary-200"
+                  >
+                    <p className="text-sm font-medium text-gray-700 mb-1">{t('settings.monthlyRentPreview')}:</p>
+                    <p className="text-lg font-bold text-primary-600">
+                      {presetFormData.size} {t('common.ft')} × {getCurrencySymbol()}{presetFormData.rentPerSqFt}{t('settings.perSqFt')} = {formatCurrency(presetFormData.size * presetFormData.rentPerSqFt)}/{t('common.month')}
+                    </p>
+                  </motion.div>
+                )}
+                
+                <div className="flex justify-end gap-3 mt-6">
+                  <Button variant="secondary" onClick={cancelPresetEdit}>
+                    <X className="w-4 h-4 mr-2" />
+                    {t('common.cancel')}
+                  </Button>
+                  <Button variant="gradient" onClick={savePreset}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {editingPreset ? t('common.save') : t('settings.addSizePreset')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Presets List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('settings.currentSizePresets')}</CardTitle>
+          <p className="text-sm text-gray-600">{t('settings.manageSizeConfigurations')}</p>
+        </CardHeader>
+        <CardContent>
+          {settings.unitSizes.presets.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <Database className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{t('settings.noUnitSizePresets')}</h3>
+              <p className="text-gray-600 mb-4">{t('settings.createFirstPresetDescription')}</p>
+              <Button variant="gradient" onClick={startAddingPreset}>
+                <Plus className="w-4 h-4 mr-2" />
+                {t('settings.createFirstPresetButton')}
+              </Button>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {settings.unitSizes.presets.map((preset, index) => (
+                <motion.div
+                  key={preset.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className={`relative group bg-gradient-to-br from-white to-gray-50 border-2 rounded-xl p-6 hover:shadow-lg transition-all duration-300 ${
+                    editingPreset?.id === preset.id 
+                      ? 'border-primary-300 ring-4 ring-primary-100' 
+                      : 'border-gray-200 hover:border-primary-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-900">{preset.name}</h3>
+                    <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => startEditingPreset(preset)}
+                        className="p-2 text-primary-600 hover:bg-primary-100 rounded-lg transition-colors"
+                        title={t('settings.editSizePreset')}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteUnitSizePreset(preset.id)}
+                        className="p-2 text-danger-600 hover:bg-danger-100 rounded-lg transition-colors"
+                        title={t('settings.deleteSizePreset')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-gray-600">
+                      <Grid3x3 className="w-4 h-4 mr-2 text-primary-500" />
+                      <span className="text-sm font-medium">{preset.size} {t('common.ft')}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-gray-600">
+                      <DollarSign className="w-4 h-4 mr-2 text-success-500" />
+                      <span className="text-sm font-medium">
+                        {getCurrencySymbol()}{preset.rentPerSqFt} {t('settings.perSqFt')}
+                      </span>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 mb-1">{t('settings.monthlyRentPreview')}</p>
+                      <p className="text-xl font-bold text-primary-600">
+                        {formatCurrency(preset.size * preset.rentPerSqFt)}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   // Render current section
   const renderCurrentSection = () => {
     switch (activeSection) {
@@ -635,6 +962,8 @@ const Settings = () => {
         return renderBusinessSection();
       case 'pricing':
         return renderPricingSection();
+      case 'unitsizes':
+        return renderUnitSizesSection();
       case 'system':
         return (
           <Card>
