@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
 import {
@@ -17,6 +18,8 @@ import {
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
+  
   // Sample data for charts
   const revenueData = [
     { month: 'Jan', revenue: 45000 },
@@ -28,15 +31,15 @@ const Dashboard = () => {
   ];
 
   const occupancyData = [
-    { name: 'Available', value: 35, color: '#10b981' },
-    { name: 'Occupied', value: 145, color: '#3b82f6' },
-    { name: 'Maintenance', value: 8, color: '#f59e0b' },
-    { name: 'Reserved', value: 12, color: '#8b5cf6' },
+    { name: t('units.available'), value: 35, color: '#10b981' },
+    { name: t('units.occupied'), value: 145, color: '#3b82f6' },
+    { name: t('units.maintenance'), value: 8, color: '#f59e0b' },
+    { name: t('units.reserved'), value: 12, color: '#8b5cf6' },
   ];
 
   const metrics = [
     {
-      title: 'Total Revenue',
+      title: t('dashboard.totalRevenue'),
       value: '$67,420',
       change: '+12.5%',
       trend: 'up',
@@ -45,16 +48,16 @@ const Dashboard = () => {
       bgColor: 'from-green-50 to-emerald-50'
     },
     {
-      title: 'Total Units',
+      title: t('dashboard.totalUnits'),
       value: '200',
-      subtitle: '145 Occupied',
+      subtitle: '145 ' + t('units.occupied'),
       occupancy: '72.5%',
       icon: Package,
       color: 'from-blue-500 to-indigo-600',
       bgColor: 'from-blue-50 to-indigo-50'
     },
     {
-      title: 'Active Customers',
+      title: t('dashboard.activeCustomers'),
       value: '145',
       change: '+8',
       trend: 'up',
@@ -63,9 +66,9 @@ const Dashboard = () => {
       bgColor: 'from-purple-50 to-pink-50'
     },
     {
-      title: 'Payment Due',
+      title: t('dashboard.overduePayments'),
       value: '12',
-      subtitle: '$8,450 pending',
+      subtitle: '$8,450 ' + t('payments.pending').toLowerCase(),
       alert: true,
       icon: AlertCircle,
       color: 'from-orange-500 to-red-600',
@@ -96,13 +99,13 @@ const Dashboard = () => {
         className="flex justify-between items-center"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your storage units.</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="success" size="lg">
             <CheckCircle className="w-4 h-4 mr-1" />
-            System Online
+            {t('common.systemOnline') || 'System Online'}
           </Badge>
         </div>
       </motion.div>
@@ -127,7 +130,7 @@ const Dashboard = () => {
                       <p className="text-sm text-gray-500">{metric.subtitle}</p>
                     )}
                     {metric.occupancy && (
-                      <Badge variant="primary">{metric.occupancy} Occupancy</Badge>
+                      <Badge variant="primary">{metric.occupancy} {t('dashboard.occupancyRate')}</Badge>
                     )}
                     {metric.change && (
                       <div className="flex items-center space-x-1">
@@ -144,7 +147,7 @@ const Dashboard = () => {
                       </div>
                     )}
                     {metric.alert && (
-                      <Badge variant="danger" pulse>Attention Required</Badge>
+                      <Badge variant="danger" pulse>{t('notifications.actionRequired')}</Badge>
                     )}
                   </div>
                   <div className={`p-3 rounded-xl bg-gradient-to-br ${metric.color} shadow-lg`}>
@@ -169,7 +172,7 @@ const Dashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Revenue Trend</span>
+                <span>{t('reports.monthlyTrend')}</span>
                 <Badge variant="success">
                   <TrendingUp className="w-3 h-3 mr-1" />
                   +12.5%
@@ -217,7 +220,7 @@ const Dashboard = () => {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Unit Occupancy</CardTitle>
+              <CardTitle>{t('reports.unitDistribution')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
@@ -254,7 +257,7 @@ const Dashboard = () => {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle>{t('dashboard.recentActivity')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {recentActivities.map((activity) => (
@@ -289,10 +292,10 @@ const Dashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <span>Upcoming Expirations</span>
+                <span>{t('dashboard.expiringContracts')}</span>
                 <Badge variant="warning">
                   <Clock className="w-3 h-3 mr-1" />
-                  4 Soon
+                  4 {t('common.soon') || 'Soon'}
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -302,9 +305,9 @@ const Dashboard = () => {
                   <div key={item.id} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-gray-900">Unit {item.unit}</span>
+                        <span className="font-semibold text-gray-900">{t('units.unitNumber')} {item.unit}</span>
                         <Badge variant={item.daysLeft <= 7 ? 'danger' : 'warning'} size="sm">
-                          {item.daysLeft} days
+                          {item.daysLeft} {t('common.days') || 'days'}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600">{item.customer}</p>

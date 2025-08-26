@@ -27,7 +27,11 @@
     "actions": "Actions",
     "settings": "Settings",
     "logout": "Logout",
-    "language": "Language"
+    "language": "Language",
+    "systemOnline": "System Online",
+    "all": "All",
+    "soon": "Soon",
+    "days": "days"
   },
   "navigation": {
     "dashboard": "Dashboard",

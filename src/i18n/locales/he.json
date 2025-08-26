@@ -27,7 +27,11 @@
     "actions": "פעולות",
     "settings": "הגדרות",
     "logout": "יציאה",
-    "language": "שפה"
+    "language": "שפה",
+    "systemOnline": "המערכת פעילה",
+    "all": "הכל",
+    "soon": "בקרוב",
+    "days": "ימים"
   },
   "navigation": {
     "dashboard": "לוח בקרה",
