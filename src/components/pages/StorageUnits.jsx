@@ -55,11 +55,11 @@ const StorageUnits = () => {
 
   // Unit size templates with default prices
   const unitSizes = {
-    '5x5': { label: 'Small (5x5 ft)', sqft: 25, defaultPrice: 50 },
-    '5x10': { label: 'Medium (5x10 ft)', sqft: 50, defaultPrice: 75 },
-    '10x10': { label: 'Large (10x10 ft)', sqft: 100, defaultPrice: 100 },
-    '10x15': { label: 'XL (10x15 ft)', sqft: 150, defaultPrice: 150 },
-    '10x20': { label: 'XXL (10x20 ft)', sqft: 200, defaultPrice: 200 }
+    '5x5': { label: t('units.sizeSmall'), sqft: 25, defaultPrice: 50 },
+    '5x10': { label: t('units.sizeMedium'), sqft: 50, defaultPrice: 75 },
+    '10x10': { label: t('units.sizeLarge'), sqft: 100, defaultPrice: 100 },
+    '10x15': { label: t('units.sizeXL'), sqft: 150, defaultPrice: 150 },
+    '10x20': { label: t('units.sizeXXL'), sqft: 200, defaultPrice: 200 }
   };
 
   // Initialize with sample data
@@ -456,7 +456,7 @@ const StorageUnits = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">{t('units.size')}:</span>
-                    <span className="font-medium">{unit.size} ft</span>
+                    <span className="font-medium">{unit.size} {t('common.ft')}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">{t('units.monthlyRate')}:</span>
@@ -470,7 +470,7 @@ const StorageUnits = () => {
                       </div>
                       {unit.rental_end && (
                         <p className="text-xs text-gray-500">
-                          Until: {new Date(unit.rental_end).toLocaleDateString()}
+                          {t('units.until')}: {new Date(unit.rental_end).toLocaleDateString()}
                         </p>
                       )}
                     </>
@@ -517,7 +517,7 @@ const StorageUnits = () => {
                   <tr key={unit.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{unit.unit_number}</td>
                     <td className="py-3 px-4">{unit.floor}</td>
-                    <td className="py-3 px-4">{unit.size}</td>
+                    <td className="py-3 px-4">{unit.size} {t('common.ft')}</td>
                     <td className="py-3 px-4 font-bold">{formatCurrency(unit.monthly_rate)}</td>
                     <td className="py-3 px-4">
                       <Badge
@@ -615,7 +615,7 @@ const StorageUnits = () => {
                           value={formData.unit_number}
                           onChange={handleInputChange}
                           required
-                          placeholder="e.g., A101"
+                          placeholder={t('units.unitNumberPlaceholder')}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                       </div>
@@ -694,7 +694,7 @@ const StorageUnits = () => {
                       {t('customers.contactInfo')} 
                       {formData.status === 'available' && (
                         <span className="text-sm font-normal text-gray-500 ml-2">
-                          (Not required for available units)
+                          {t('units.notRequiredForAvailable')}
                         </span>
                       )}
                     </h3>
@@ -732,7 +732,7 @@ const StorageUnits = () => {
                           disabled={formData.status === 'available'}
                           readOnly
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 bg-gray-50"
-                          placeholder="Auto-filled from customer selection"
+                          placeholder={t('units.autoFilledFromCustomer')}
                         />
                       </div>
 
@@ -748,7 +748,7 @@ const StorageUnits = () => {
                           disabled={formData.status === 'available'}
                           readOnly
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 bg-gray-50"
-                          placeholder="Auto-filled from customer selection"
+                          placeholder={t('units.autoFilledFromCustomer')}
                         />
                       </div>
 
@@ -764,7 +764,7 @@ const StorageUnits = () => {
                           disabled={formData.status === 'available'}
                           readOnly
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 bg-gray-50"
-                          placeholder="Auto-filled from customer selection"
+                          placeholder={t('units.autoFilledFromCustomer')}
                         />
                       </div>
 
@@ -810,7 +810,7 @@ const StorageUnits = () => {
                     onChange={handleInputChange}
                     rows="3"
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Any additional information..."
+                    placeholder={t('units.anyAdditionalInfo')}
                   />
                 </div>
 

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { useAppContext } from '../../context/AppContext';
+import { formatCurrency } from '../../utils/currency';
 import {
   User,
   Mail,
@@ -35,6 +38,8 @@ import Card from '../ui/Card';
 import Badge from '../ui/Badge';
 
 const Customers = () => {
+  const { t } = useTranslation();
+  const appContext = useAppContext();
   const [customers, setCustomers] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -238,7 +243,7 @@ const Customers = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this customer?')) {
+    if (window.confirm(t('customers.confirmDelete'))) {
       setCustomers(prev => prev.filter(c => c.id !== id));
       setSelectedCustomer(null);
     }
@@ -254,9 +259,9 @@ const Customers = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl font-bold gradient-text mb-2"
         >
-          Customer Management
+          {t('customers.title')}
         </motion.h1>
-        <p className="text-gray-600">Manage your customers and their information</p>
+        <p className="text-gray-600">{t('customers.subtitle')}</p>
       </div>
 
       {/* Stats Cards */}
@@ -269,7 +274,7 @@ const Customers = () => {
           <Card className="border-l-4 border-primary-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Customers</p>
+                <p className="text-sm text-gray-600 mb-1">{t('customers.totalCustomers') || 'Total Customers'}</p>
                 <p className="text-3xl font-bold">{customers.length}</p>
               </div>
               <Users className="w-10 h-10 text-primary-500 opacity-20" />
@@ -285,7 +290,7 @@ const Customers = () => {
           <Card className="border-l-4 border-success-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Active Customers</p>
+                <p className="text-sm text-gray-600 mb-1">{t('dashboard.activeCustomers')}</p>
                 <p className="text-3xl font-bold">
                   {customers.filter(c => c.status === 'active').length}
                 </p>
@@ -303,7 +308,7 @@ const Customers = () => {
           <Card className="border-l-4 border-warning-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">With Balance</p>
+                <p className="text-sm text-gray-600 mb-1">{t('customers.withBalance')}</p>
                 <p className="text-3xl font-bold">
                   {customers.filter(c => c.balance > 0).length}
                 </p>
@@ -321,7 +326,7 @@ const Customers = () => {
           <Card className="border-l-4 border-accent-500">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">WhatsApp Enabled</p>
+                <p className="text-sm text-gray-600 mb-1">{t('customers.whatsappEnabled')}</p>
                 <p className="text-3xl font-bold">
                   {customers.filter(c => c.whatsapp_notifications).length}
                 </p>
@@ -340,7 +345,7 @@ const Customers = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search customers..."
+              placeholder={t('customers.searchCustomers')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-64 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -353,10 +358,10 @@ const Customers = () => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="suspended">Suspended</option>
+            <option value="all">{t('customers.allStatus')}</option>
+            <option value="active">{t('customers.active')}</option>
+            <option value="inactive">{t('customers.inactive')}</option>
+            <option value="suspended">{t('customers.suspended')}</option>
           </select>
 
           {/* View Toggle */}
@@ -396,7 +401,7 @@ const Customers = () => {
           }}
         >
           <Plus className="w-5 h-5 mr-2" />
-          Add Customer
+          {t('customers.addCustomer')}
         </Button>
       </div>
 
@@ -421,11 +426,11 @@ const Customers = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg">{customer.full_name}</h3>
-                        <p className="text-sm text-gray-500">{customer.company_name || 'Personal'}</p>
+                        <p className="text-sm text-gray-500">{customer.company_name || t('customers.personal')}</p>
                       </div>
                     </div>
                     <Badge variant={customer.status === 'active' ? 'success' : 'danger'}>
-                      {customer.status}
+                      {t(`customers.${customer.status}`)}
                     </Badge>
                   </div>
 
@@ -446,12 +451,12 @@ const Customers = () => {
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="text-center p-2 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Active Units</p>
+                      <p className="text-xs text-gray-500">{t('customers.activeUnits')}</p>
                       <p className="text-lg font-bold text-primary-600">{customer.active_units}</p>
                     </div>
                     <div className="text-center p-2 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Balance</p>
-                      <p className="text-lg font-bold text-warning-600">${customer.balance}</p>
+                      <p className="text-xs text-gray-500">{t('customers.balance')}</p>
+                      <p className="text-lg font-bold text-warning-600">{formatCurrency(customer.balance)}</p>
                     </div>
                   </div>
 
@@ -461,7 +466,7 @@ const Customers = () => {
                         <Badge variant="success">WhatsApp</Badge>
                       )}
                       {customer.email_notifications && (
-                        <Badge variant="info">Email</Badge>
+                        <Badge variant="info">{t('customers.email')}</Badge>
                       )}
                     </div>
                     <div className="flex gap-2">
@@ -496,13 +501,13 @@ const Customers = () => {
             <table className="w-full">
               <thead className="border-b">
                 <tr>
-                  <th className="text-left py-3 px-4">Customer</th>
-                  <th className="text-left py-3 px-4">Contact</th>
-                  <th className="text-left py-3 px-4">Location</th>
-                  <th className="text-center py-3 px-4">Units</th>
-                  <th className="text-right py-3 px-4">Balance</th>
-                  <th className="text-center py-3 px-4">Status</th>
-                  <th className="text-center py-3 px-4">Actions</th>
+                  <th className="text-left py-3 px-4">{t('customers.customer')}</th>
+                  <th className="text-left py-3 px-4">{t('customers.contact')}</th>
+                  <th className="text-left py-3 px-4">{t('customers.location')}</th>
+                  <th className="text-center py-3 px-4">{t('customers.units')}</th>
+                  <th className="text-right py-3 px-4">{t('customers.balance')}</th>
+                  <th className="text-center py-3 px-4">{t('common.status')}</th>
+                  <th className="text-center py-3 px-4">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -516,7 +521,7 @@ const Customers = () => {
                         </div>
                         <div>
                           <p className="font-medium">{customer.full_name}</p>
-                          <p className="text-sm text-gray-500">{customer.company_name || 'Personal'}</p>
+                          <p className="text-sm text-gray-500">{customer.company_name || t('customers.personal')}</p>
                         </div>
                       </div>
                     </td>
@@ -532,7 +537,7 @@ const Customers = () => {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <span className={`font-medium ${customer.balance > 0 ? 'text-warning-600' : 'text-gray-600'}`}>
-                        ${customer.balance}
+                        {formatCurrency(customer.balance)}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-center">
@@ -783,22 +788,22 @@ const Customers = () => {
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       >
-                        <option value="email">Email</option>
-                        <option value="phone">Phone</option>
+                        <option value="email">{t('customers.email')}</option>
+                        <option value="phone">{t('customers.phone')}</option>
                         <option value="sms">SMS</option>
-                        <option value="mail">Mail</option>
+                        <option value="mail">{t('customers.mail')}</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Referral Source
+                        {t('customers.referralSource')}
                       </label>
                       <input
                         type="text"
                         name="referral_source"
                         value={formData.referral_source}
                         onChange={handleInputChange}
-                        placeholder="How did they hear about us?"
+                        placeholder={t('customers.howDidTheyHear')}
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                       />
                     </div>
@@ -813,7 +818,7 @@ const Customers = () => {
                         onChange={handleInputChange}
                         className="rounded text-primary-500 focus:ring-primary-500"
                       />
-                      <span className="text-sm">Email Notifications</span>
+                      <span className="text-sm">{t('customers.emailNotifications')}</span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
@@ -823,7 +828,7 @@ const Customers = () => {
                         onChange={handleInputChange}
                         className="rounded text-primary-500 focus:ring-primary-500"
                       />
-                      <span className="text-sm">SMS Notifications</span>
+                      <span className="text-sm">{t('customers.smsNotifications')}</span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
@@ -833,7 +838,7 @@ const Customers = () => {
                         onChange={handleInputChange}
                         className="rounded text-primary-500 focus:ring-primary-500"
                       />
-                      <span className="text-sm">WhatsApp Notifications</span>
+                      <span className="text-sm">{t('customers.whatsappNotifications')}</span>
                     </label>
                   </div>
                 </div>
@@ -842,7 +847,7 @@ const Customers = () => {
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <FileText className="w-5 h-5 text-primary-500" />
-                    Notes
+                    {t('customers.notes')}
                   </h3>
                   <div>
                     <textarea
@@ -850,7 +855,7 @@ const Customers = () => {
                       value={formData.notes}
                       onChange={handleInputChange}
                       rows="4"
-                      placeholder="Add any additional notes about this customer..."
+                      placeholder={t('customers.additionalNotes')}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                   </div>
@@ -863,11 +868,11 @@ const Customers = () => {
                     variant="secondary"
                     onClick={() => setIsFormOpen(false)}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" variant="gradient">
                     <Save className="w-5 h-5 mr-2" />
-                    {isEditMode ? 'Update Customer' : 'Add Customer'}
+                    {isEditMode ? t('customers.updateCustomer') : t('customers.addCustomer')}
                   </Button>
                 </div>
               </form>
@@ -909,7 +914,7 @@ const Customers = () => {
                     onClick={() => handleEdit(selectedCustomer)}
                   >
                     <Edit2 className="w-4 h-4 mr-2" />
-                    Edit
+                    {t('common.edit')}
                   </Button>
                   <button
                     onClick={() => setSelectedCustomer(null)}
@@ -950,7 +955,7 @@ const Customers = () => {
                         <Badge variant="success">WhatsApp</Badge>
                       )}
                       {selectedCustomer.email_notifications && (
-                        <Badge variant="info">Email</Badge>
+                        <Badge variant="info">{t('customers.email')}</Badge>
                       )}
                       {selectedCustomer.sms_notifications && (
                         <Badge variant="warning">SMS</Badge>
@@ -961,27 +966,27 @@ const Customers = () => {
                     <Card>
                       <h3 className="font-semibold mb-4 flex items-center gap-2">
                         <Phone className="w-5 h-5 text-primary-500" />
-                        Contact Information
+                        {t('customers.contactInfo')}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex items-center gap-3">
                           <Mail className="w-4 h-4 text-gray-400" />
                           <div>
-                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="text-sm text-gray-500">{t('customers.email')}</p>
                             <p className="font-medium">{selectedCustomer.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <Phone className="w-4 h-4 text-gray-400" />
                           <div>
-                            <p className="text-sm text-gray-500">Phone</p>
+                            <p className="text-sm text-gray-500">{t('customers.phone')}</p>
                             <p className="font-medium">{selectedCustomer.phone}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <MapPin className="w-4 h-4 text-gray-400" />
                           <div>
-                            <p className="text-sm text-gray-500">Address</p>
+                            <p className="text-sm text-gray-500">{t('customers.address')}</p>
                             <p className="font-medium">
                               {selectedCustomer.address}<br/>
                               {selectedCustomer.city}, {selectedCustomer.state} {selectedCustomer.zip_code}
@@ -991,7 +996,7 @@ const Customers = () => {
                         <div className="flex items-center gap-3">
                           <Calendar className="w-4 h-4 text-gray-400" />
                           <div>
-                            <p className="text-sm text-gray-500">Customer Since</p>
+                            <p className="text-sm text-gray-500">{t('customers.customerSince')}</p>
                             <p className="font-medium">{selectedCustomer.customer_since}</p>
                           </div>
                         </div>
@@ -1002,20 +1007,20 @@ const Customers = () => {
                     <Card>
                       <h3 className="font-semibold mb-4 flex items-center gap-2">
                         <DollarSign className="w-5 h-5 text-primary-500" />
-                        Financial Summary
+                        {t('customers.financialSummary')}
                       </h3>
                       <div className="grid grid-cols-3 gap-4">
                         <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-500">Active Units</p>
+                          <p className="text-sm text-gray-500">{t('customers.activeUnits')}</p>
                           <p className="text-2xl font-bold text-primary-600">{selectedCustomer.active_units}</p>
                         </div>
                         <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-500">Current Balance</p>
-                          <p className="text-2xl font-bold text-warning-600">${selectedCustomer.balance}</p>
+                          <p className="text-sm text-gray-500">{t('customers.currentBalance')}</p>
+                          <p className="text-2xl font-bold text-warning-600">{formatCurrency(selectedCustomer.balance)}</p>
                         </div>
                         <div className="text-center p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-500">Total Paid</p>
-                          <p className="text-2xl font-bold text-success-600">${selectedCustomer.total_paid}</p>
+                          <p className="text-sm text-gray-500">{t('customers.totalPaid')}</p>
+                          <p className="text-2xl font-bold text-success-600">{formatCurrency(selectedCustomer.total_paid)}</p>
                         </div>
                       </div>
                     </Card>
@@ -1026,28 +1031,28 @@ const Customers = () => {
                 {activeTab === 'units' && (
                   <div className="text-center py-12">
                     <Package className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500">Active units will be displayed here</p>
+                    <p className="text-gray-500">{t('customers.activeUnitsMessage')}</p>
                   </div>
                 )}
 
                 {activeTab === 'payments' && (
                   <div className="text-center py-12">
                     <CreditCard className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500">Payment history will be displayed here</p>
+                    <p className="text-gray-500">{t('customers.paymentHistoryMessage')}</p>
                   </div>
                 )}
 
                 {activeTab === 'documents' && (
                   <div className="text-center py-12">
                     <FileText className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500">Customer documents will be displayed here</p>
+                    <p className="text-gray-500">{t('customers.documentsMessage')}</p>
                   </div>
                 )}
 
                 {activeTab === 'activity' && (
                   <div className="text-center py-12">
                     <Clock className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500">Activity log will be displayed here</p>
+                    <p className="text-gray-500">{t('customers.activityLogMessage')}</p>
                   </div>
                 )}
               </div>
