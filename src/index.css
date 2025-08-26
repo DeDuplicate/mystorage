@@ -67,26 +67,26 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    @apply bg-gray-100 dark:bg-gray-800;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-400 rounded-full;
+    @apply bg-gray-400 dark:bg-gray-600 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-500;
+    @apply bg-gray-500 dark:bg-gray-500;
   }
 }
 
 @layer components {
   /* Glass morphism effect */
   .glass {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+    @apply bg-white/80 backdrop-blur-xl border border-white/30 shadow-xl;
   }
 
   .glass-dark {
-    @apply bg-gray-900/70 backdrop-blur-xl border border-gray-700/50 shadow-xl;
+    @apply bg-gray-900/80 backdrop-blur-xl border border-gray-700/40 shadow-xl;
   }
 
   /* Neumorphism effect */

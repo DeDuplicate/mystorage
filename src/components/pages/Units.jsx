@@ -73,36 +73,36 @@ const Units = () => {
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Unit {unit.id}</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Unit {unit.id}</h3>
               <Badge variant={unit.status} size="sm">
                 {unit.status}
               </Badge>
             </div>
-            <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 rounded-lg">
-              <MoreVertical className="w-5 h-5 text-gray-600" />
+            <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+              <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
 
           <div className="space-y-2 text-sm">
-            <div className="flex items-center text-gray-600">
+            <div className="flex items-center text-gray-600 dark:text-gray-300">
               <Maximize className="w-4 h-4 mr-2" />
               <span>{unit.size} ({unit.type})</span>
             </div>
-            <div className="flex items-center text-gray-600">
+            <div className="flex items-center text-gray-600 dark:text-gray-300">
               <MapPin className="w-4 h-4 mr-2" />
               <span>Floor {unit.floor}</span>
             </div>
-            <div className="flex items-center font-semibold text-gray-900">
+            <div className="flex items-center font-semibold text-gray-900 dark:text-gray-100">
               <DollarSign className="w-4 h-4 mr-2" />
               <span>${unit.price}/month</span>
             </div>
             {unit.customer && (
               <>
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
                   <User className="w-4 h-4 mr-2" />
                   <span>{unit.customer}</span>
                 </div>
-                <div className="flex items-center text-gray-600">
+                <div className="flex items-center text-gray-600 dark:text-gray-300">
                   <Calendar className="w-4 h-4 mr-2" />
                   <span>Ends: {unit.contractEnd}</span>
                 </div>
@@ -136,32 +136,32 @@ const Units = () => {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       whileHover={{ backgroundColor: 'rgba(249, 250, 251, 0.5)' }}
-      className="border-b border-gray-100"
+      className="border-b border-gray-100 dark:border-gray-700"
     >
       <td className="px-6 py-4">
         <div className="flex items-center space-x-2">
           <div className={`w-2 h-2 rounded-full ${statusColors[unit.status]}`} />
-          <span className="font-medium text-gray-900">{unit.id}</span>
+          <span className="font-medium text-gray-900 dark:text-gray-100">{unit.id}</span>
         </div>
       </td>
       <td className="px-6 py-4">
         <Badge variant={unit.status}>{unit.status}</Badge>
       </td>
-      <td className="px-6 py-4 text-gray-600">{unit.size}</td>
-      <td className="px-6 py-4 text-gray-600">{unit.type}</td>
-      <td className="px-6 py-4 font-semibold text-gray-900">${unit.price}</td>
-      <td className="px-6 py-4 text-gray-600">{unit.customer || '-'}</td>
-      <td className="px-6 py-4 text-gray-600">{unit.contractEnd || '-'}</td>
+      <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{unit.size}</td>
+      <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{unit.type}</td>
+      <td className="px-6 py-4 font-semibold text-gray-900 dark:text-gray-100">${unit.price}</td>
+      <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{unit.customer || '-'}</td>
+      <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{unit.contractEnd || '-'}</td>
       <td className="px-6 py-4">
         <div className="flex space-x-2">
-          <button className="p-1 hover:bg-gray-100 rounded">
-            <Eye className="w-4 h-4 text-gray-600" />
+          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <Eye className="w-4 h-4 text-gray-600 dark:text-gray-300" />
           </button>
-          <button className="p-1 hover:bg-gray-100 rounded">
-            <Edit className="w-4 h-4 text-gray-600" />
+          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <Edit className="w-4 h-4 text-gray-600 dark:text-gray-300" />
           </button>
-          <button className="p-1 hover:bg-red-50 rounded">
-            <Trash2 className="w-4 h-4 text-red-600" />
+          <button className="p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
+            <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
           </button>
         </div>
       </td>
@@ -177,8 +177,8 @@ const Units = () => {
         className="flex justify-between items-center"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Storage Units</h1>
-          <p className="text-gray-500 mt-1">Manage and monitor all storage units</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Storage Units</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage and monitor all storage units</p>
         </div>
         <Button variant="primary">
           <Package className="w-4 h-4 mr-2" />
@@ -196,13 +196,13 @@ const Units = () => {
             onClick={() => setFilterStatus(status)}
             className={`p-4 rounded-xl transition-all ${
               filterStatus === status
-                ? 'glass shadow-lg scale-105'
-                : 'bg-white hover:shadow-md'
+                ? 'glass dark:glass-dark shadow-lg scale-105'
+                : 'bg-white dark:bg-gray-800 hover:shadow-md'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-600 capitalize">{status}</span>
-              <span className="text-2xl font-bold text-gray-900">{count}</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-300 capitalize">{status}</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{count}</span>
             </div>
             {status !== 'all' && (
               <div className={`mt-2 h-1 rounded-full ${statusColors[status]}`} />
@@ -223,7 +223,7 @@ const Units = () => {
                   placeholder="Search by unit ID or customer..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <Button variant="outline">
@@ -235,7 +235,7 @@ const Units = () => {
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-primary-100 text-primary-600' : 'text-gray-600 hover:bg-gray-100'
+                  viewMode === 'grid' ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 <Grid3x3 className="w-5 h-5" />
@@ -243,7 +243,7 @@ const Units = () => {
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list' ? 'bg-primary-100 text-primary-600' : 'text-gray-600 hover:bg-gray-100'
+                  viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 <List className="w-5 h-5" />
@@ -264,16 +264,16 @@ const Units = () => {
         <Card>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contract End</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Unit ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Size</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Customer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contract End</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody>

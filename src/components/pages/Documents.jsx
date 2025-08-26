@@ -428,7 +428,7 @@ const Documents = () => {
           <select
             value={selectedCustomer}
             onChange={(e) => setSelectedCustomer(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">{t('documents.allCustomers')}</option>
             {customers.map(customer => (
@@ -442,7 +442,7 @@ const Documents = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">{t('documents.allCategories')}</option>
             {Object.entries(documentCategories).map(([key, category]) => (
@@ -456,7 +456,7 @@ const Documents = () => {
           <select
             value={selectedContract}
             onChange={(e) => setSelectedContract(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">{t('documents.allContracts')}</option>
             {contracts.map(contract => (
@@ -783,7 +783,7 @@ const Documents = () => {
                           value={formData.category}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           {Object.entries(documentCategories).map(([key, category]) => (
                             <option key={key} value={key}>
@@ -802,7 +802,7 @@ const Documents = () => {
                           value={formData.customer_id}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="">{t('documents.selectCustomer')}</option>
                           {customers.map(customer => (
@@ -821,7 +821,7 @@ const Documents = () => {
                           name="contract_id"
                           value={formData.contract_id}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="">{t('documents.noContract')}</option>
                           {formData.customer_id && getCustomerContracts(formData.customer_id).map(contract => (
@@ -855,7 +855,7 @@ const Documents = () => {
                             name="access_level"
                             value={formData.access_level}
                             onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                           >
                             <option value="private">{t('documents.private')}</option>
                             <option value="shared">{t('documents.shared')}</option>

@@ -42,10 +42,10 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="w-64 h-screen glass border-r border-gray-200/20 flex flex-col"
+      className="w-64 h-screen glass dark:glass-dark border-r border-gray-200/20 dark:border-gray-700/30 flex flex-col"
     >
       {/* Logo Section */}
-      <div className="p-6 border-b border-gray-200/20">
+      <div className="p-6 border-b border-gray-200/20 dark:border-gray-700/30">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -57,7 +57,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           </div>
           <div>
             <h1 className="text-xl font-bold gradient-text">StoreSpace</h1>
-            <p className="text-xs text-gray-500">Management System</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Management System</p>
           </div>
         </motion.div>
       </div>
@@ -73,7 +73,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             onClick={() => setActiveTab(item.id)}
             className={cn(
               'w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200',
-              'hover:bg-white/50 hover:shadow-md group',
+              'hover:bg-white/50 dark:hover:bg-gray-800/50 hover:shadow-md group',
               activeTab === item.id
                 ? 'bg-gradient-to-r from-primary-500/20 to-accent-500/20 shadow-md border border-primary-500/30'
                 : 'hover:translate-x-1'
@@ -83,16 +83,16 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
               className={cn(
                 'w-5 h-5 transition-colors',
                 activeTab === item.id
-                  ? 'text-primary-600'
-                  : 'text-gray-600 group-hover:text-primary-500'
+                  ? 'text-primary-600 dark:text-primary-400'
+                  : 'text-gray-600 dark:text-gray-300 group-hover:text-primary-500'
               )}
             />
             <span
               className={cn(
                 'font-medium transition-colors',
                 activeTab === item.id
-                  ? 'text-primary-700'
-                  : 'text-gray-700 group-hover:text-gray-900'
+                  ? 'text-primary-700 dark:text-primary-300'
+                  : 'text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-gray-100'
               )}
             >
               {item.label}
@@ -108,15 +108,15 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="p-4 border-t border-gray-200/20 space-y-1">
+      <div className="p-4 border-t border-gray-200/20 dark:border-gray-700/30 space-y-1">
         {bottomItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/50 transition-all duration-200 group relative"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/50 dark:hover:bg-gray-800/50 transition-all duration-200 group relative"
           >
-            <item.icon className="w-5 h-5 text-gray-600 group-hover:text-primary-500" />
-            <span className="font-medium text-gray-700 group-hover:text-gray-900">
+            <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-primary-500" />
+            <span className="font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-gray-100">
               {item.label}
             </span>
             {item.badge && (
@@ -129,19 +129,19 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       </div>
 
       {/* Language Switcher */}
-      <div className="p-4 border-t border-gray-200/20">
+      <div className="p-4 border-t border-gray-200/20 dark:border-gray-700/30">
         <LanguageSwitcher />
       </div>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-gray-200/20">
-        <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-primary-50 to-accent-50">
+      <div className="p-4 border-t border-gray-200/20 dark:border-gray-700/30">
+        <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-semibold">
             AD
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-gray-800">Admin User</p>
-            <p className="text-xs text-gray-500">admin@storespace.com</p>
+            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Admin User</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">admin@storespace.com</p>
           </div>
         </div>
       </div>

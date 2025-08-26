@@ -14,7 +14,7 @@ const Card = React.forwardRef(({
       ref={ref}
       className={cn(
         'rounded-2xl p-6',
-        glass ? 'glass' : 'bg-white shadow-lg',
+        glass ? 'glass dark:glass-dark' : 'bg-white dark:bg-gray-800 shadow-lg',
         hover && 'card-hover cursor-pointer',
         className
       )}
@@ -42,7 +42,7 @@ CardHeader.displayName = 'CardHeader';
 const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
+    className={cn('text-2xl font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100', className)}
     {...props}
   />
 ));

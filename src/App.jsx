@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppProvider } from './context/AppContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './components/pages/Dashboard';
 import StorageUnits from './components/pages/StorageUnits';
@@ -60,12 +61,13 @@ function App() {
   );
 
   return (
-    <AppProvider>
-      <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <ThemeProvider>
+      <AppProvider>
+        <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         {/* Background Pattern */}
         <div className="fixed inset-0 -z-10">
           <div className="absolute inset-0 opacity-30">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800"></div>
             <div className="absolute inset-0" style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
               backgroundSize: '60px 60px'
@@ -92,7 +94,8 @@ function App() {
           </AnimatePresence>
         </main>
       </div>
-    </AppProvider>
+      </AppProvider>
+    </ThemeProvider>
   );
 }
 

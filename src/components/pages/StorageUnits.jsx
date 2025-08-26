@@ -418,7 +418,7 @@ const StorageUnits = () => {
               placeholder={t('common.search') + '...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-64 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="pl-10 pr-4 py-2 w-64 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
@@ -426,7 +426,7 @@ const StorageUnits = () => {
           <select
             value={selectedFloor}
             onChange={(e) => setSelectedFloor(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">{t('common.all')} {t('units.floor')}</option>
             <option value="1">{t('units.floor')} 1</option>
@@ -437,7 +437,7 @@ const StorageUnits = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">{t('common.all')} {t('common.status')}</option>
             <option value="available">{t('units.available')}</option>
@@ -662,7 +662,7 @@ const StorageUnits = () => {
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('units.unitNumber')} *
                         </label>
                         <input
@@ -672,19 +672,19 @@ const StorageUnits = () => {
                           onChange={handleInputChange}
                           required
                           placeholder={t('units.unitNumberPlaceholder')}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('units.floor')} *
                         </label>
                         <select
                           name="floor"
                           value={formData.floor}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value={1}>{t('units.floor')} 1</option>
                           <option value={2}>{t('units.floor')} 2</option>
@@ -693,14 +693,14 @@ const StorageUnits = () => {
 
                       {/* Unit Size Selection */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('units.size')} *
                         </label>
                         <select
                           name="size_preset"
                           value={formData.size_preset}
                           onChange={(e) => handlePresetChange(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="">{t('settings.selectPresetSize')}</option>
                           {unitSizePresets.map((preset) => (
@@ -720,7 +720,7 @@ const StorageUnits = () => {
                       {/* Custom Size Input */}
                       {(formData.use_custom_size || formData.size_preset === 'custom') && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {t('settings.customSize')} (sq ft) *
                           </label>
                           <input
@@ -730,7 +730,7 @@ const StorageUnits = () => {
                             onChange={(e) => setFormData(prev => ({...prev, size: parseFloat(e.target.value) || 0}))}
                             min="1"
                             required
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                             placeholder="Enter size in square feet"
                           />
                         </div>
@@ -774,7 +774,7 @@ const StorageUnits = () => {
                           required
                           min="0"
                           step="0.01"
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                           disabled={formData.rent_calculation_mode === 'calculated' && formData.size_preset && formData.size_preset !== 'custom'}
                         />
                         {formData.rent_calculation_mode === 'calculated' && formData.size_preset && formData.size_preset !== 'custom' && (
@@ -785,14 +785,14 @@ const StorageUnits = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('common.status')} *
                         </label>
                         <select
                           name="status"
                           value={formData.status}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="available">{t('units.available')}</option>
                           <option value="occupied">{t('units.occupied')}</option>
@@ -816,7 +816,7 @@ const StorageUnits = () => {
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('units.assignCustomer')}
                         </label>
                         <select
@@ -824,7 +824,7 @@ const StorageUnits = () => {
                           value={formData.customer_id}
                           onChange={handleInputChange}
                           disabled={formData.status === 'available'}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 dark:disabled:bg-gray-800"
                         >
                           <option value="">{t('units.assignCustomer')}</option>
                           {customers.map(customer => (
@@ -836,7 +836,7 @@ const StorageUnits = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('customers.customerName')}
                         </label>
                         <input
@@ -852,7 +852,7 @@ const StorageUnits = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('customers.phone')}
                         </label>
                         <input
@@ -868,7 +868,7 @@ const StorageUnits = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('customers.email')}
                         </label>
                         <input
@@ -884,7 +884,7 @@ const StorageUnits = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('contracts.startDate')}
                         </label>
                         <input
@@ -893,12 +893,12 @@ const StorageUnits = () => {
                           value={formData.rental_start}
                           onChange={handleInputChange}
                           disabled={formData.status === 'available'}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 dark:disabled:bg-gray-800"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {t('contracts.endDate')}
                         </label>
                         <input
@@ -907,7 +907,7 @@ const StorageUnits = () => {
                           value={formData.rental_end}
                           onChange={handleInputChange}
                           disabled={formData.status === 'available'}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-50 dark:disabled:bg-gray-800"
                         />
                       </div>
                     </div>

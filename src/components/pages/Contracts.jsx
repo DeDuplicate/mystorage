@@ -569,7 +569,7 @@ const Contracts = () => {
           <select
             value={selectedCustomer}
             onChange={(e) => setSelectedCustomer(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">{t('contracts.allCustomers')}</option>
             {customers.map(customer => (
@@ -583,7 +583,7 @@ const Contracts = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="all">{t('contracts.allStatus')}</option>
             {Object.entries(contractStatuses).map(([key, status]) => (
@@ -742,7 +742,7 @@ const Contracts = () => {
                           value={formData.customer_id}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="">{t('contracts.selectCustomer')}</option>
                           {customers.map(customer => (
@@ -788,7 +788,7 @@ const Contracts = () => {
                           name="selected_template"
                           value={formData.selected_template}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="">{t('contracts.noTemplate')}</option>
                           <optgroup label={t('contracts.predefinedTemplates')}>
@@ -840,7 +840,7 @@ const Contracts = () => {
                           value={formData.unit_id}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="">{t('contracts.selectAUnit')}</option>
                           {getAvailableUnits().map(unit => (
@@ -875,7 +875,7 @@ const Contracts = () => {
                           name="contract_type"
                           value={formData.contract_type}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           <option value="rental">{t('contracts.rentalAgreement')}</option>
                           <option value="lease">{t('contracts.leaseAgreement')}</option>
@@ -953,7 +953,7 @@ const Contracts = () => {
                           name="status"
                           value={formData.status}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                           {Object.entries(contractStatuses).map(([key, status]) => (
                             <option key={key} value={key}>
@@ -1216,7 +1216,7 @@ const Contracts = () => {
                               name="contract_type"
                               value={templateFormData.contract_type}
                               onChange={handleTemplateFormChange}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                             >
                               <option value="rental">{t('contracts.rentalAgreement')}</option>
                               <option value="lease">{t('contracts.leaseAgreement')}</option>

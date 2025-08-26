@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
@@ -40,16 +41,22 @@ import {
   Edit2,
   Trash2,
   Plus,
+  Users,
   X,
   ChevronRight,
   ChevronLeft,
   HelpCircle,
-  Grid3x3
+  Grid3x3,
+  MessageSquare,
+  MessageCircle,
+  Smartphone,
+  Server
 } from 'lucide-react';
 
 const Settings = () => {
   const { t, i18n } = useTranslation();
   const { customers, units, contracts, payments } = useAppContext();
+  const { theme, updateTheme } = useTheme();
   
   // Get current language
   const currentLang = i18n.language;
@@ -58,6 +65,20 @@ const Settings = () => {
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showUnsavedChanges, setShowUnsavedChanges] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [showMessageTemplates, setShowMessageTemplates] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [templateFormData, setTemplateFormData] = useState({
+    name: '',
+    subject: '',
+    message: ''
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [settings, setSettings] = useState({
     // User Profile
     profile: {
@@ -130,19 +151,16 @@ const Settings = () => {
     // Security
     security: {
       twoFactorAuth: false,
-      loginAttempts: 5,
-      lockoutDuration: 15,
-      passwordExpiry: 90,
       requireStrongPassword: true,
-      sessionSecurity: 'high',
-      ipWhitelist: [],
-      auditLogging: true,
-      dataEncryption: true
+      loginEmail: '',
+      enablePasswordRecovery: true,
+      recoveryViaEmail: true,
+      recoveryViaWhatsApp: false,
+      recoveryPhone: ''
     },
 
     // Appearance
     appearance: {
-      theme: 'light', // 'light', 'dark', 'system'
       primaryColor: '#3B82F6',
       fontFamily: 'Inter',
       fontSize: 'medium',
@@ -164,6 +182,80 @@ const Settings = () => {
       googleMapsApiKey: '',
       webhookUrl: '',
       apiAccess: false
+    },
+
+    // Notification Settings
+    notifications: {
+      // Email/SMTP Settings
+      email: {
+        enabled: true,
+        smtpProvider: 'custom', // 'custom', 'gmail', 'outlook', 'sendgrid'
+        smtpHost: '',
+        smtpPort: 587,
+        smtpUsername: '',
+        smtpPassword: '',
+        smtpSecure: true, // TLS/SSL
+        fromEmail: '',
+        fromName: 'Storage Management System',
+        // Notification preferences
+        contractExpiry: true,
+        paymentDue: true,
+        paymentOverdue: true,
+        maintenanceReminder: true,
+        newCustomer: true
+      },
+      // WhatsApp Settings
+      whatsapp: {
+        enabled: false,
+        provider: 'twilio', // 'twilio', 'wame'
+        // Twilio Settings
+        twilioAccountSid: '',
+        twilioAuthToken: '',
+        twilioPhoneNumber: '',
+        // WA.me Settings
+        businessPhone: '',
+        // Notification preferences
+        contractExpiry: true,
+        paymentDue: true,
+        paymentOverdue: true,
+        maintenanceReminder: false,
+        newCustomer: false
+      },
+      // SMS Settings
+      sms: {
+        enabled: false,
+        provider: 'twilio', // 'twilio', 'custom'
+        twilioAccountSid: '',
+        twilioAuthToken: '',
+        twilioPhoneNumber: '',
+        // Notification preferences
+        contractExpiry: true,
+        paymentDue: true,
+        paymentOverdue: true,
+        maintenanceReminder: false,
+        newCustomer: false
+      },
+      // Custom Message Templates
+      messageTemplates: [
+        {
+          id: 'contract_expiry',
+          name: 'Contract Expiry Reminder',
+          subject: 'Contract Expiring Soon - Action Required',
+          message: 'Dear [CUSTOMER_NAME],\n\nYour storage contract for unit [UNIT_NUMBER] will expire on [EXPIRY_DATE].\n\nPlease contact us to renew your contract.\n\nBest regards,\n[COMPANY_NAME]'
+        },
+        {
+          id: 'payment_due',
+          name: 'Payment Due Reminder',
+          subject: 'Payment Due - [UNIT_NUMBER]',
+          message: 'Dear [CUSTOMER_NAME],\n\nYour payment of [AMOUNT] for unit [UNIT_NUMBER] is due on [DUE_DATE].\n\nPlease make your payment to avoid any late fees.\n\nBest regards,\n[COMPANY_NAME]'
+        },
+        {
+          id: 'payment_overdue',
+          name: 'Payment Overdue Notice',
+          subject: 'Urgent: Payment Overdue - [UNIT_NUMBER]',
+          message: 'Dear [CUSTOMER_NAME],\n\nYour payment of [AMOUNT] for unit [UNIT_NUMBER] is now overdue by [DAYS_OVERDUE] days.\n\nPlease make immediate payment to avoid service interruption.\n\nBest regards,\n[COMPANY_NAME]'
+        }
+      ]
     },
 
     // Unit Size Presets
@@ -201,13 +293,28 @@ const Settings = () => {
 
   // Handle input changes
   const handleInputChange = (section, field, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
+    // Handle dotted notation like 'notifications.email'
+    if (section.includes('.')) {
+      const [mainSection, subSection] = section.split('.');
+      setSettings(prev => ({
+        ...prev,
+        [mainSection]: {
+          ...prev[mainSection],
+          [subSection]: {
+            ...prev[mainSection][subSection],
+            [field]: value
+          }
+        }
+      }));
+    } else {
+      setSettings(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value
+        }
+      }));
+    }
   };
 
   // Handle language change
@@ -238,6 +345,42 @@ const Settings = () => {
     setOriginalSettings(settings);
     // In a real app, this would save to backend
     alert(t('settings.settingsSavedSuccessfully'));
+  };
+
+  // Handle password change
+  const handleChangePassword = () => {
+    // Validate passwords
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      alert(t('settings.fillAllPasswordFields'));
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert(t('settings.passwordsDoNotMatch'));
+      return;
+    }
+
+    if (settings.security.requireStrongPassword) {
+      // Check for strong password requirements
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(passwordData.newPassword)) {
+        alert(t('settings.weakPasswordError'));
+        return;
+      }
+    }
+
+    // In a real app, this would validate current password and update in backend
+    console.log('Changing password...');
+    alert(t('settings.passwordChangedSuccessfully'));
+    
+    // Clear password fields
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
   };
 
   // Reset settings
@@ -383,6 +526,123 @@ const Settings = () => {
     }
   };
 
+  // SMTP Provider auto-fill presets
+  const smtpPresets = {
+    gmail: {
+      smtpHost: 'smtp.gmail.com',
+      smtpPort: 587,
+      smtpSecure: true
+    },
+    outlook: {
+      smtpHost: 'smtp-mail.outlook.com', 
+      smtpPort: 587,
+      smtpSecure: true
+    },
+    sendgrid: {
+      smtpHost: 'smtp.sendgrid.net',
+      smtpPort: 587,
+      smtpSecure: true
+    },
+    custom: {
+      smtpHost: '',
+      smtpPort: 587,
+      smtpSecure: true
+    }
+  };
+
+  // Handle SMTP provider change with auto-fill
+  const handleSmtpProviderChange = (provider) => {
+    const preset = smtpPresets[provider];
+    if (preset) {
+      setSettings(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          email: {
+            ...prev.notifications.email,
+            smtpProvider: provider,
+            smtpHost: preset.smtpHost,
+            smtpPort: preset.smtpPort,
+            smtpSecure: preset.smtpSecure
+          }
+        }
+      }));
+    }
+  };
+
+  // Message template management functions
+  const handleTemplateFormChange = (e) => {
+    const { name, value } = e.target;
+    setTemplateFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const startEditingTemplate = (template) => {
+    setEditingTemplate(template);
+    setTemplateFormData({
+      name: template.name,
+      subject: template.subject,
+      message: template.message
+    });
+    setShowMessageTemplates(true);
+  };
+
+  const saveTemplate = () => {
+    if (!templateFormData.name.trim() || !templateFormData.subject.trim() || !templateFormData.message.trim()) {
+      alert(t('settings.fillAllFields'));
+      return;
+    }
+
+    const templateToSave = {
+      id: editingTemplate?.id || `custom_${Date.now()}`,
+      name: templateFormData.name.trim(),
+      subject: templateFormData.subject.trim(),
+      message: templateFormData.message.trim(),
+      isCustom: !editingTemplate?.id.includes('contract_expiry') && !editingTemplate?.id.includes('payment_')
+    };
+
+    if (editingTemplate) {
+      // Update existing template
+      setSettings(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          messageTemplates: prev.notifications.messageTemplates.map(t => 
+            t.id === editingTemplate.id ? templateToSave : t
+          )
+        }
+      }));
+    } else {
+      // Add new template
+      setSettings(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          messageTemplates: [...prev.notifications.messageTemplates, templateToSave]
+        }
+      }));
+    }
+
+    // Reset form and close modal
+    setTemplateFormData({ name: '', subject: '', message: '' });
+    setEditingTemplate(null);
+    setShowMessageTemplates(false);
+  };
+
+  const deleteTemplate = (templateId) => {
+    if (window.confirm(t('settings.confirmDeleteTemplate'))) {
+      setSettings(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          messageTemplates: prev.notifications.messageTemplates.filter(t => t.id !== templateId)
+        }
+      }));
+    }
+  };
+
   // Avatar upload functions
   const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
@@ -491,62 +751,62 @@ const Settings = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.firstName')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.firstName')}</label>
               <input
                 type="text"
                 value={settings.profile.firstName}
                 onChange={(e) => handleInputChange('profile', 'firstName', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.lastName')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.lastName')}</label>
               <input
                 type="text"
                 value={settings.profile.lastName}
                 onChange={(e) => handleInputChange('profile', 'lastName', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.email')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.email')}</label>
             <input
               type="email"
               value={settings.profile.email}
               onChange={(e) => handleInputChange('profile', 'email', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.phone')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.phone')}</label>
             <input
               type="tel"
               value={settings.profile.phone}
               onChange={(e) => handleInputChange('profile', 'phone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.jobTitle')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.jobTitle')}</label>
             <input
               type="text"
               value={settings.profile.title}
               onChange={(e) => handleInputChange('profile', 'title', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.timezone')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.timezone')}</label>
               <select
                 value={settings.profile.timezone}
                 onChange={(e) => handleInputChange('profile', 'timezone', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="America/New_York">Eastern Time (EST)</option>
                 <option value="America/Chicago">Central Time (CST)</option>
@@ -556,11 +816,11 @@ const Settings = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.language')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.language')}</label>
               <select
                 value={settings.profile.language}
                 onChange={(e) => handleLanguageChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="en-US">English (US)</option>
                 <option value="he-IL">עברית (Hebrew)</option>
@@ -597,21 +857,21 @@ const Settings = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.companyName')}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.companyName')}</label>
           <input
             type="text"
             value={settings.business.companyName}
             onChange={(e) => handleInputChange('business', 'companyName', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.businessType')}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.businessType')}</label>
           <select
             value={settings.business.businessType}
             onChange={(e) => handleInputChange('business', 'businessType', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="Self Storage Facility">Self Storage Facility</option>
             <option value="RV Storage">RV Storage</option>
@@ -622,82 +882,82 @@ const Settings = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.phone')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.phone')}</label>
             <input
               type="tel"
               value={settings.business.phone}
               onChange={(e) => handleInputChange('business', 'phone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.email')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.email')}</label>
             <input
               type="email"
               value={settings.business.email}
               onChange={(e) => handleInputChange('business', 'email', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.address')}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.address')}</label>
           <input
             type="text"
             value={settings.business.address}
             onChange={(e) => handleInputChange('business', 'address', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.city')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('customers.city')}</label>
             <input
               type="text"
               value={settings.business.city}
               onChange={(e) => handleInputChange('business', 'city', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.state')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('customers.state')}</label>
             <input
               type="text"
               value={settings.business.state}
               onChange={(e) => handleInputChange('business', 'state', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.zipCode')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('customers.zipCode')}</label>
             <input
               type="text"
               value={settings.business.zipCode}
               onChange={(e) => handleInputChange('business', 'zipCode', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.website')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.website')}</label>
             <input
               type="url"
               value={settings.business.website}
               onChange={(e) => handleInputChange('business', 'website', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.taxId')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.taxId')}</label>
             <input
               type="text"
               value={settings.business.taxId}
               onChange={(e) => handleInputChange('business', 'taxId', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </div>
@@ -715,18 +975,18 @@ const Settings = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.lateFeeType')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.lateFeeType')}</label>
               <select
                 value={settings.pricing.lateFeeType}
                 onChange={(e) => handleInputChange('pricing', 'lateFeeType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="flat">{t('settings.flatFee')}</option>
                 <option value="percentage">{t('settings.percentage')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {settings.pricing.lateFeeType === 'flat' ? 'Fee Amount ($)' : 'Percentage (%)'}
               </label>
               <input
@@ -735,19 +995,19 @@ const Settings = () => {
                 onChange={(e) => handleInputChange('pricing', 'defaultLateFee', parseFloat(e.target.value))}
                 min="0"
                 step={settings.pricing.lateFeeType === 'flat' ? '1' : '0.1'}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.gracePeriod')}</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.gracePeriod')}</label>
             <input
               type="number"
               value={settings.pricing.lateFeeGracePeriod}
               onChange={(e) => handleInputChange('pricing', 'lateFeeGracePeriod', parseInt(e.target.value))}
               min="0"
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
         </CardContent>
@@ -771,11 +1031,11 @@ const Settings = () => {
           {settings.pricing.securityDepositRequired && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.depositType')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.depositType')}</label>
                 <select
                   value={settings.pricing.defaultSecurityDeposit}
                   onChange={(e) => handleInputChange('pricing', 'defaultSecurityDeposit', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="monthly_rate">{t('settings.equalToMonthlyRate')}</option>
                   <option value="fixed">{t('settings.fixedAmount')}</option>
@@ -783,13 +1043,13 @@ const Settings = () => {
               </div>
               {settings.pricing.defaultSecurityDeposit === 'fixed' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.fixedAmount')} ({getCurrencySymbol()})</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.fixedAmount')} ({getCurrencySymbol()})</label>
                   <input
                     type="number"
                     value={settings.pricing.fixedSecurityDeposit}
                     onChange={(e) => handleInputChange('pricing', 'fixedSecurityDeposit', parseFloat(e.target.value))}
                     min="0"
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
               )}
@@ -805,7 +1065,7 @@ const Settings = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.taxRate')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.taxRate')}</label>
               <input
                 type="number"
                 value={settings.pricing.taxRate}
@@ -813,7 +1073,7 @@ const Settings = () => {
                 min="0"
                 max="100"
                 step="0.1"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div className="flex items-center mt-6">
@@ -839,7 +1099,7 @@ const Settings = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>{t('settings.unitSizePresets')}</CardTitle>
-            <p className="text-sm text-gray-600 mt-1">{t('settings.unitSizeConfiguration')}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-400 mt-1">{t('settings.unitSizeConfiguration')}</p>
           </div>
           <Button 
             variant="gradient" 
@@ -930,7 +1190,7 @@ const Settings = () => {
                     animate={{ opacity: 1 }}
                     className="mt-4 p-4 bg-white rounded-lg border border-primary-200"
                   >
-                    <p className="text-sm font-medium text-gray-700 mb-1">{t('settings.monthlyRentPreview')}:</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.monthlyRentPreview')}:</p>
                     <p className="text-lg font-bold text-primary-600">
                       {presetFormData.size} {t('common.ft')} × {getCurrencySymbol()}{presetFormData.rentPerSqFt}{t('settings.perSqFt')} = {formatCurrency(presetFormData.size * presetFormData.rentPerSqFt)}/{t('common.month')}
                     </p>
@@ -957,7 +1217,7 @@ const Settings = () => {
       <Card>
         <CardHeader>
           <CardTitle>{t('settings.currentSizePresets')}</CardTitle>
-          <p className="text-sm text-gray-600">{t('settings.manageSizeConfigurations')}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t('settings.manageSizeConfigurations')}</p>
         </CardHeader>
         <CardContent>
           {settings.unitSizes.presets.length === 0 ? (
@@ -1024,7 +1284,7 @@ const Settings = () => {
                     </div>
                     
                     <div className="pt-2 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 mb-1">{t('settings.monthlyRentPreview')}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('settings.monthlyRentPreview')}</p>
                       <p className="text-xl font-bold text-primary-600">
                         {formatCurrency(preset.size * preset.rentPerSqFt)}
                       </p>
@@ -1034,6 +1294,446 @@ const Settings = () => {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Render notifications section
+  const renderNotificationsSection = () => (
+    <div className="space-y-6">
+      {/* Email/SMTP Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="w-5 h-5" />
+            {t('settings.emailNotifications')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={settings.notifications.email.enabled}
+              onChange={(e) => handleInputChange('notifications.email', 'enabled', e.target.checked)}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <label className="text-sm font-medium text-gray-700">{t('settings.enableEmailNotifications')}</label>
+          </div>
+
+          {settings.notifications.email.enabled && (
+            <div className="space-y-4 pl-6 border-l-2 border-primary-100">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.smtpProvider')}</label>
+                  <select
+                    value={settings.notifications.email.smtpProvider}
+                    onChange={(e) => handleSmtpProviderChange(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="custom">Custom SMTP</option>
+                    <option value="gmail">Gmail</option>
+                    <option value="outlook">Outlook</option>
+                    <option value="sendgrid">SendGrid</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.smtpHost')}</label>
+                  <input
+                    type="text"
+                    value={settings.notifications.email.smtpHost}
+                    onChange={(e) => handleInputChange('notifications.email', 'smtpHost', e.target.value)}
+                    placeholder="smtp.gmail.com"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.smtpPort')}</label>
+                  <input
+                    type="number"
+                    value={settings.notifications.email.smtpPort}
+                    onChange={(e) => handleInputChange('notifications.email', 'smtpPort', parseInt(e.target.value))}
+                    placeholder="587"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.smtpUsername')}</label>
+                  <input
+                    type="text"
+                    value={settings.notifications.email.smtpUsername}
+                    onChange={(e) => handleInputChange('notifications.email', 'smtpUsername', e.target.value)}
+                    placeholder="your-email@gmail.com"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.smtpPassword')}</label>
+                  <input
+                    type="password"
+                    value={settings.notifications.email.smtpPassword}
+                    onChange={(e) => handleInputChange('notifications.email', 'smtpPassword', e.target.value)}
+                    placeholder="App Password"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.fromEmail')}</label>
+                  <input
+                    type="email"
+                    value={settings.notifications.email.fromEmail}
+                    onChange={(e) => handleInputChange('notifications.email', 'fromEmail', e.target.value)}
+                    placeholder="noreply@yourdomain.com"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.fromName')}</label>
+                  <input
+                    type="text"
+                    value={settings.notifications.email.fromName}
+                    onChange={(e) => handleInputChange('notifications.email', 'fromName', e.target.value)}
+                    placeholder="Storage Management System"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={settings.notifications.email.smtpSecure}
+                  onChange={(e) => handleInputChange('notifications.email', 'smtpSecure', e.target.checked)}
+                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                <label className="text-sm font-medium text-gray-700">{t('settings.useTLS')}</label>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3">{t('settings.emailNotificationTypes')}</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { key: 'contractExpiry', label: t('settings.contractExpiryNotification') },
+                    { key: 'paymentDue', label: t('settings.paymentDueNotification') },
+                    { key: 'paymentOverdue', label: t('settings.paymentOverdueNotification') },
+                    { key: 'maintenanceReminder', label: t('settings.maintenanceReminderNotification') },
+                    { key: 'newCustomer', label: t('settings.newCustomerNotification') }
+                  ].map(item => (
+                    <div key={item.key} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.email[item.key]}
+                        onChange={(e) => handleInputChange('notifications.email', item.key, e.target.checked)}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <label className="text-sm text-gray-700 dark:text-gray-300">{item.label}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* WhatsApp Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            WhatsApp Notifications
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={settings.notifications.whatsapp.enabled}
+              onChange={(e) => handleInputChange('notifications.whatsapp', 'enabled', e.target.checked)}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <label className="text-sm font-medium text-gray-700">{t('settings.enableWhatsAppNotifications')}</label>
+          </div>
+
+          {settings.notifications.whatsapp.enabled && (
+            <div className="space-y-4 pl-6 border-l-2 border-green-100">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">WhatsApp Provider</label>
+                <select
+                  value={settings.notifications.whatsapp.provider}
+                  onChange={(e) => handleInputChange('notifications.whatsapp', 'provider', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="twilio">Twilio WhatsApp API</option>
+                  <option value="wame">WA.me Links (Manual)</option>
+                </select>
+              </div>
+
+              {settings.notifications.whatsapp.provider === 'twilio' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twilio Account SID</label>
+                      <input
+                        type="text"
+                        value={settings.notifications.whatsapp.twilioAccountSid}
+                        onChange={(e) => handleInputChange('notifications.whatsapp', 'twilioAccountSid', e.target.value)}
+                        placeholder="AC..."
+                        className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twilio Auth Token</label>
+                      <input
+                        type="password"
+                        value={settings.notifications.whatsapp.twilioAuthToken}
+                        onChange={(e) => handleInputChange('notifications.whatsapp', 'twilioAuthToken', e.target.value)}
+                        placeholder="Auth Token"
+                        className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twilio WhatsApp Number</label>
+                    <input
+                      type="text"
+                      value={settings.notifications.whatsapp.twilioPhoneNumber}
+                      onChange={(e) => handleInputChange('notifications.whatsapp', 'twilioPhoneNumber', e.target.value)}
+                      placeholder="whatsapp:+14155238886"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {settings.notifications.whatsapp.provider === 'wame' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Phone Number</label>
+                  <input
+                    type="text"
+                    value={settings.notifications.whatsapp.businessPhone}
+                    onChange={(e) => handleInputChange('notifications.whatsapp', 'businessPhone', e.target.value)}
+                    placeholder="+1234567890"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {t('settings.wameDescription')}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3">WhatsApp Notification Types</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { key: 'contractExpiry', label: t('settings.contractExpiryNotification') },
+                    { key: 'paymentDue', label: t('settings.paymentDueNotification') },
+                    { key: 'paymentOverdue', label: t('settings.paymentOverdueNotification') },
+                    { key: 'maintenanceReminder', label: t('settings.maintenanceReminderNotification') },
+                    { key: 'newCustomer', label: t('settings.newCustomerNotification') }
+                  ].map(item => (
+                    <div key={item.key} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.whatsapp[item.key]}
+                        onChange={(e) => handleInputChange('notifications.whatsapp', item.key, e.target.checked)}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <label className="text-sm text-gray-700 dark:text-gray-300">{item.label}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* SMS Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            SMS Notifications
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={settings.notifications.sms.enabled}
+              onChange={(e) => handleInputChange('notifications.sms', 'enabled', e.target.checked)}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <label className="text-sm font-medium text-gray-700">Enable SMS notifications</label>
+          </div>
+
+          {settings.notifications.sms.enabled && (
+            <div className="space-y-4 pl-6 border-l-2 border-blue-100">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SMS Provider</label>
+                <select
+                  value={settings.notifications.sms.provider}
+                  onChange={(e) => handleInputChange('notifications.sms', 'provider', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="twilio">Twilio SMS</option>
+                  <option value="custom">Custom SMS Gateway</option>
+                </select>
+              </div>
+
+              {settings.notifications.sms.provider === 'twilio' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twilio Account SID</label>
+                      <input
+                        type="text"
+                        value={settings.notifications.sms.twilioAccountSid}
+                        onChange={(e) => handleInputChange('notifications.sms', 'twilioAccountSid', e.target.value)}
+                        placeholder="AC..."
+                        className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twilio Auth Token</label>
+                      <input
+                        type="password"
+                        value={settings.notifications.sms.twilioAuthToken}
+                        onChange={(e) => handleInputChange('notifications.sms', 'twilioAuthToken', e.target.value)}
+                        placeholder="Auth Token"
+                        className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Twilio Phone Number</label>
+                    <input
+                      type="text"
+                      value={settings.notifications.sms.twilioPhoneNumber}
+                      onChange={(e) => handleInputChange('notifications.sms', 'twilioPhoneNumber', e.target.value)}
+                      placeholder="+1234567890"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3">SMS Notification Types</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { key: 'contractExpiry', label: t('settings.contractExpiryNotification') },
+                    { key: 'paymentDue', label: t('settings.paymentDueNotification') },
+                    { key: 'paymentOverdue', label: t('settings.paymentOverdueNotification') },
+                    { key: 'maintenanceReminder', label: t('settings.maintenanceReminderNotification') },
+                    { key: 'newCustomer', label: t('settings.newCustomerNotification') }
+                  ].map(item => (
+                    <div key={item.key} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.sms[item.key]}
+                        onChange={(e) => handleInputChange('notifications.sms', item.key, e.target.checked)}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <label className="text-sm text-gray-700 dark:text-gray-300">{item.label}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Custom Message Templates */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            {t('settings.customMessageTemplates')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {t('settings.messageTemplatesDescription')}
+            </p>
+            <Button
+              variant="gradient"
+              onClick={() => {
+                setTemplateFormData({ name: '', subject: '', message: '' });
+                setEditingTemplate(null);
+                setShowMessageTemplates(true);
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              {t('settings.addTemplate')}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {settings.notifications.messageTemplates.map((template) => (
+              <motion.div
+                key={template.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <h4 className="font-semibold text-gray-900 text-sm">
+                    {template.name}
+                  </h4>
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => startEditingTemplate(template)}
+                      className="p-1 text-primary-600 hover:bg-primary-100 rounded transition-colors"
+                      title={t('settings.editTemplate')}
+                    >
+                      <Edit2 className="w-3 h-3" />
+                    </button>
+                    {template.isCustom && (
+                      <button
+                        onClick={() => deleteTemplate(template.id)}
+                        className="p-1 text-danger-600 hover:bg-danger-100 rounded transition-colors"
+                        title={t('settings.deleteTemplate')}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-600 font-medium">
+                    {t('settings.emailSubject')}: {template.subject}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-3">
+                    {template.message.substring(0, 100)}...
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h5 className="font-medium text-blue-900 mb-2">{t('settings.availablePlaceholders')}:</h5>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-blue-700">
+              <span>[CUSTOMER_NAME]</span>
+              <span>[UNIT_NUMBER]</span>
+              <span>[AMOUNT]</span>
+              <span>[DUE_DATE]</span>
+              <span>[EXPIRY_DATE]</span>
+              <span>[DAYS_OVERDUE]</span>
+              <span>[COMPANY_NAME]</span>
+              <span>[CUSTOMER_PHONE]</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -1050,6 +1750,8 @@ const Settings = () => {
         return renderPricingSection();
       case 'unitsizes':
         return renderUnitSizesSection();
+      case 'notifications':
+        return renderNotificationsSection();
       case 'system':
         return (
           <Card>
@@ -1059,11 +1761,11 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.currency')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.currency')}</label>
                   <select
                     value={settings.system.defaultCurrency}
                     onChange={(e) => handleInputChange('system', 'defaultCurrency', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="USD">US Dollar (USD)</option>
                     <option value="ILS">Israeli Shekel (ILS - ₪)</option>
@@ -1073,11 +1775,11 @@ const Settings = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.dateFormat')}</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.dateFormat')}</label>
                   <select
                     value={settings.system.dateFormat}
                     onChange={(e) => handleInputChange('system', 'dateFormat', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                     <option value="DD/MM/YYYY">DD/MM/YYYY</option>
@@ -1110,6 +1812,215 @@ const Settings = () => {
             </CardContent>
           </Card>
         );
+      case 'security':
+        return (
+          <div className="space-y-6">
+            {/* Password Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="w-5 h-5" />
+                  {t('settings.passwordManagement')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    {t('settings.changePassword')}
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('settings.currentPassword')}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showCurrentPassword ? "text" : "password"}
+                          value={passwordData.currentPassword || ''}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                          className="w-full px-3 py-2 pr-10 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          placeholder={t('settings.enterCurrentPassword')}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('settings.newPassword')}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showNewPassword ? "text" : "password"}
+                          value={passwordData.newPassword || ''}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                          className="w-full px-3 py-2 pr-10 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          placeholder={t('settings.enterNewPassword')}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('settings.confirmNewPassword')}
+                      </label>
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        value={passwordData.confirmPassword || ''}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder={t('settings.confirmPassword')}
+                      />
+                    </div>
+
+                    <Button 
+                      variant="primary" 
+                      onClick={handleChangePassword}
+                      className="w-full"
+                    >
+                      <Lock className="w-4 h-4 mr-2" />
+                      {t('settings.updatePassword')}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="checkbox"
+                      checked={settings.security.requireStrongPassword}
+                      onChange={(e) => handleInputChange('security', 'requireStrongPassword', e.target.checked)}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t('settings.requireStrongPassword')}
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                    {t('settings.strongPasswordHelp')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Authentication Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  {t('settings.authenticationSettings')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('settings.loginEmail')}
+                  </label>
+                  <input
+                    type="email"
+                    value={settings.security.loginEmail || settings.profile.email}
+                    onChange={(e) => handleInputChange('security', 'loginEmail', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder={t('settings.enterLoginEmail')}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {t('settings.loginEmailHelp')}
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={settings.security.twoFactorAuth}
+                    onChange={(e) => handleInputChange('security', 'twoFactorAuth', e.target.checked)}
+                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {t('settings.enableTwoFactorAuth')}
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={settings.security.enablePasswordRecovery}
+                    onChange={(e) => handleInputChange('security', 'enablePasswordRecovery', e.target.checked)}
+                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {t('settings.enablePasswordRecovery')}
+                  </label>
+                </div>
+
+                {settings.security.enablePasswordRecovery && (
+                  <div className="ml-6 space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={settings.security.recoveryViaEmail}
+                        onChange={(e) => handleInputChange('security', 'recoveryViaEmail', e.target.checked)}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <label className="text-sm text-gray-700 dark:text-gray-300">
+                        {t('settings.recoveryViaEmail')}
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={settings.security.recoveryViaWhatsApp}
+                        onChange={(e) => handleInputChange('security', 'recoveryViaWhatsApp', e.target.checked)}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <label className="text-sm text-gray-700 dark:text-gray-300">
+                        {t('settings.recoveryViaWhatsApp')}
+                      </label>
+                    </div>
+
+                    {settings.security.recoveryViaWhatsApp && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          {t('settings.recoveryPhone')}
+                        </label>
+                        <input
+                          type="tel"
+                          value={settings.security.recoveryPhone || settings.profile.phone}
+                          onChange={(e) => handleInputChange('security', 'recoveryPhone', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                          placeholder="+972501234567"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                  <div className="flex">
+                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 flex-shrink-0" />
+                    <div className="text-sm text-blue-700 dark:text-blue-300">
+                      <p className="font-semibold mb-1">{t('settings.loginRequired')}</p>
+                      <p>{t('settings.loginRequiredHelp')}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
       case 'appearance':
         return (
           <Card>
@@ -1124,20 +2035,20 @@ const Settings = () => {
                     { value: 'light', label: t('settings.light'), icon: Sun },
                     { value: 'dark', label: t('settings.dark'), icon: Moon },
                     { value: 'system', label: t('settings.system'), icon: Monitor }
-                  ].map(theme => {
-                    const Icon = theme.icon;
+                  ].map(themeOption => {
+                    const Icon = themeOption.icon;
                     return (
                       <button
-                        key={theme.value}
-                        onClick={() => handleInputChange('appearance', 'theme', theme.value)}
+                        key={themeOption.value}
+                        onClick={() => updateTheme(themeOption.value)}
                         className={`p-4 rounded-lg border-2 transition-colors ${
-                          settings.appearance.theme === theme.value
-                            ? 'border-primary-500 bg-primary-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          theme === themeOption.value
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
                         }`}
                       >
-                        <Icon className="w-8 h-8 mx-auto mb-2" />
-                        <p className="text-sm font-medium">{theme.label}</p>
+                        <Icon className="w-8 h-8 mx-auto mb-2 text-gray-600 dark:text-gray-300" />
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{themeOption.label}</p>
                       </button>
                     );
                   })}
@@ -1145,7 +2056,7 @@ const Settings = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('settings.primaryColor')}</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('settings.primaryColor')}</label>
                 <input
                   type="color"
                   value={settings.appearance.primaryColor}
@@ -1212,7 +2123,7 @@ const Settings = () => {
                       <Icon className="w-5 h-5 mr-3" />
                       <div className="flex-1">
                         <p className="font-medium">{section.label}</p>
-                        <p className="text-xs text-gray-500">{section.description}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{section.description}</p>
                       </div>
                       {currentLang === 'he' ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
@@ -1277,6 +2188,117 @@ const Settings = () => {
           </div>
         </div>
       </div>
+
+      {/* Message Template Modal */}
+      <AnimatePresence>
+        {showMessageTemplates && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowMessageTemplates(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                <h2 className="text-2xl font-bold">
+                  {editingTemplate ? t('settings.editTemplate') : t('settings.addNewTemplate')}
+                </h2>
+                <button
+                  onClick={() => setShowMessageTemplates(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('settings.templateName')} *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={templateFormData.name}
+                      onChange={handleTemplateFormChange}
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder={t('settings.templateNamePlaceholder')}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('settings.emailSubject')} *
+                    </label>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={templateFormData.subject}
+                      onChange={handleTemplateFormChange}
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder={t('settings.subjectPlaceholder')}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('settings.messageContent')} *
+                    </label>
+                    <textarea
+                      name="message"
+                      value={templateFormData.message}
+                      onChange={handleTemplateFormChange}
+                      rows="8"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder={t('settings.messagePlaceholder')}
+                    />
+                  </div>
+
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h5 className="font-medium text-gray-900 mb-2">{t('settings.availablePlaceholders')}:</h5>
+                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                      <span className="px-2 py-1 bg-white rounded border">[CUSTOMER_NAME]</span>
+                      <span className="px-2 py-1 bg-white rounded border">[UNIT_NUMBER]</span>
+                      <span className="px-2 py-1 bg-white rounded border">[AMOUNT]</span>
+                      <span className="px-2 py-1 bg-white rounded border">[DUE_DATE]</span>
+                      <span className="px-2 py-1 bg-white rounded border">[EXPIRY_DATE]</span>
+                      <span className="px-2 py-1 bg-white rounded border">[DAYS_OVERDUE]</span>
+                      <span className="px-2 py-1 bg-white rounded border">[COMPANY_NAME]</span>
+                      <span className="px-2 py-1 bg-white rounded border">[CUSTOMER_PHONE]</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      variant="secondary"
+                      onClick={() => setShowMessageTemplates(false)}
+                      className="flex-1"
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                    <Button
+                      variant="gradient"
+                      onClick={saveTemplate}
+                      className="flex-1"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      {editingTemplate ? t('settings.updateTemplate') : t('settings.saveTemplate')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

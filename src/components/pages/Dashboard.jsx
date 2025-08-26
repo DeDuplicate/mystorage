@@ -131,8 +131,8 @@ const Dashboard = () => {
         className="flex justify-between items-center"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
-          <p className="text-gray-500 mt-1">{t('dashboard.subtitle')}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('dashboard.title')}</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="success" size="lg">
@@ -156,10 +156,10 @@ const Dashboard = () => {
               <CardContent className="relative p-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                    <p className="text-3xl font-bold text-gray-900">{metric.value}</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{metric.title}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{metric.value}</p>
                     {metric.subtitle && (
-                      <p className="text-sm text-gray-500">{metric.subtitle}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{metric.subtitle}</p>
                     )}
                     {metric.occupancy && (
                       <Badge variant="primary">{metric.occupancy} {t('dashboard.occupancyRate')}</Badge>
@@ -167,12 +167,12 @@ const Dashboard = () => {
                     {metric.change && (
                       <div className="flex items-center space-x-1">
                         {metric.trend === 'up' ? (
-                          <ArrowUp className="w-4 h-4 text-green-500" />
+                          <ArrowUp className="w-4 h-4 text-green-600 dark:text-green-400" />
                         ) : (
-                          <ArrowDown className="w-4 h-4 text-red-500" />
+                          <ArrowDown className="w-4 h-4 text-red-600 dark:text-red-400" />
                         )}
                         <span className={`text-sm font-medium ${
-                          metric.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                          metric.trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                         }`}>
                           {metric.change}
                         </span>
@@ -293,23 +293,23 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <div className={`w-2 h-2 rounded-full mt-2 ${
                     activity.status === 'success' ? 'bg-green-500' :
                     activity.status === 'warning' ? 'bg-yellow-500' :
                     activity.status === 'new' ? 'bg-blue-500' : 'bg-gray-500'
                   }`} />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {t(activity.messageKey, activity.messageData)}
                     </p>
                     {activity.customer && (
-                      <p className="text-xs text-gray-500">{activity.customer}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{activity.customer}</p>
                     )}
                     {activity.amount && (
-                      <p className="text-sm font-semibold text-green-600">{activity.amount}</p>
+                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">{activity.amount}</p>
                     )}
-                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -325,27 +325,27 @@ const Dashboard = () => {
         >
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-baseline space-x-2">
                 <span>{t('dashboard.expiringContracts')}</span>
                 <Badge variant="warning">
-                  <Clock className="w-3 h-3 mr-1" />
-                  4 {t('common.soon') || 'Soon'}
+                  <span className="mx-1">4</span>
+                  {t('common.soon') || 'Soon'}
                 </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {upcomingExpirations.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200">
+                  <div key={item.id} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 border border-orange-200 dark:border-orange-700/50">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-gray-900">{t('units.unitNumber')} {item.unit}</span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">{t('units.unitNumber')} {item.unit}</span>
                         <Badge variant={item.daysLeft <= 7 ? 'danger' : 'warning'} size="sm">
                           {item.daysLeft} {t('common.days') || 'days'}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-600">{item.customer}</p>
-                      <p className="text-xs text-gray-500 flex items-center mt-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{item.customer}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-1">
                         <Calendar className="w-3 h-3 mr-1" />
                         {item.date}
                       </p>

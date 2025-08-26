@@ -1213,7 +1213,7 @@ const UnitsManager = () => {
                     <select
                       value={formData.floor}
                       onChange={(e) => setFormData(prev => ({ ...prev, floor: parseInt(e.target.value) }))}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value={1}>Floor 1</option>
                       <option value={2}>Floor 2</option>
@@ -1356,7 +1356,7 @@ const UnitsManager = () => {
                     <select
                       value={formData.status}
                       onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="available">Available</option>
                       <option value="occupied">Occupied</option>
