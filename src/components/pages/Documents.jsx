@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
@@ -35,6 +36,7 @@ import {
 } from 'lucide-react';
 
 const Documents = () => {
+  const { t } = useTranslation();
   const {
     customers,
     contracts,
@@ -67,14 +69,14 @@ const Documents = () => {
 
   // Document categories
   const documentCategories = {
-    contract: { label: 'Contracts', color: 'blue', icon: FileText },
-    insurance: { label: 'Insurance', color: 'green', icon: File },
-    identification: { label: 'ID Documents', color: 'purple', icon: User },
-    payment: { label: 'Payments', color: 'yellow', icon: FileSpreadsheet },
-    invoice: { label: 'Invoices', color: 'orange', icon: FileText },
-    correspondence: { label: 'Correspondence', color: 'pink', icon: FileCode },
-    legal: { label: 'Legal Documents', color: 'red', icon: Archive },
-    other: { label: 'Other', color: 'gray', icon: Folder }
+    contract: { label: t('documents.categories.contracts'), color: 'blue', icon: FileText },
+    insurance: { label: t('documents.categories.insurance'), color: 'green', icon: File },
+    identification: { label: t('documents.categories.identification'), color: 'purple', icon: User },
+    payment: { label: t('documents.categories.payments'), color: 'yellow', icon: FileSpreadsheet },
+    invoice: { label: t('documents.categories.invoices'), color: 'orange', icon: FileText },
+    correspondence: { label: t('documents.categories.correspondence'), color: 'pink', icon: FileCode },
+    legal: { label: t('documents.categories.legal'), color: 'red', icon: Archive },
+    other: { label: t('documents.categories.other'), color: 'gray', icon: Folder }
   };
 
   // Initialize with sample documents
@@ -313,7 +315,7 @@ const Documents = () => {
 
   // Delete document
   const handleDelete = (documentId) => {
-    if (window.confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+    if (window.confirm(t('documents.confirmDeleteDocument'))) {
       setDocuments(prev => prev.filter(doc => doc.id !== documentId));
     }
   };
@@ -364,8 +366,8 @@ const Documents = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold gradient-text mb-2">Documents</h1>
-        <p className="text-gray-600">Manage customer documents, contracts, and files</p>
+        <h1 className="text-4xl font-bold gradient-text mb-2">{t('documents.title')}</h1>
+        <p className="text-gray-600">{t('documents.subtitle')}</p>
       </div>
 
       {/* Statistics */}
@@ -373,37 +375,37 @@ const Documents = () => {
         <Card className="text-center">
           <Folder className="w-8 h-8 mx-auto mb-2 text-primary-500" />
           <p className="text-2xl font-bold">{stats.total}</p>
-          <p className="text-xs text-gray-600">Total Documents</p>
+          <p className="text-xs text-gray-600">{t('documents.totalDocuments')}</p>
         </Card>
 
         <Card className="text-center">
           <FileText className="w-8 h-8 mx-auto mb-2 text-blue-500" />
           <p className="text-2xl font-bold">{stats.contracts}</p>
-          <p className="text-xs text-gray-600">Contracts</p>
+          <p className="text-xs text-gray-600">{t('documents.categories.contracts')}</p>
         </Card>
 
         <Card className="text-center">
           <File className="w-8 h-8 mx-auto mb-2 text-green-500" />
           <p className="text-2xl font-bold">{stats.insurance}</p>
-          <p className="text-xs text-gray-600">Insurance</p>
+          <p className="text-xs text-gray-600">{t('documents.categories.insurance')}</p>
         </Card>
 
         <Card className="text-center">
           <User className="w-8 h-8 mx-auto mb-2 text-purple-500" />
           <p className="text-2xl font-bold">{stats.identification}</p>
-          <p className="text-xs text-gray-600">ID Documents</p>
+          <p className="text-xs text-gray-600">{t('documents.categories.identification')}</p>
         </Card>
 
         <Card className="text-center">
           <Calendar className="w-8 h-8 mx-auto mb-2 text-orange-500" />
           <p className="text-2xl font-bold">{stats.recentUploads}</p>
-          <p className="text-xs text-gray-600">Recent Uploads</p>
+          <p className="text-xs text-gray-600">{t('documents.recentUploads')}</p>
         </Card>
 
         <Card className="text-center">
           <Archive className="w-8 h-8 mx-auto mb-2 text-gray-500" />
           <p className="text-2xl font-bold">{stats.totalSize}</p>
-          <p className="text-xs text-gray-600">Total Size</p>
+          <p className="text-xs text-gray-600">{t('documents.totalSize')}</p>
         </Card>
       </div>
 
@@ -415,7 +417,7 @@ const Documents = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search documents..."
+              placeholder={t('documents.searchDocuments')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-64 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -428,7 +430,7 @@ const Documents = () => {
             onChange={(e) => setSelectedCustomer(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Customers</option>
+            <option value="all">{t('documents.allCustomers')}</option>
             {customers.map(customer => (
               <option key={customer.id} value={customer.id}>
                 {customer.name}
@@ -442,7 +444,7 @@ const Documents = () => {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Categories</option>
+            <option value="all">{t('documents.allCategories')}</option>
             {Object.entries(documentCategories).map(([key, category]) => (
               <option key={key} value={key}>
                 {category.label}
@@ -456,7 +458,7 @@ const Documents = () => {
             onChange={(e) => setSelectedContract(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Contracts</option>
+            <option value="all">{t('documents.allContracts')}</option>
             {contracts.map(contract => (
               <option key={contract.id} value={contract.id}>
                 {contract.contract_number} - {contract.customer_name}
@@ -495,7 +497,7 @@ const Documents = () => {
           onClick={() => setShowUploadModal(true)}
         >
           <Upload className="w-5 h-5 mr-2" />
-          Upload Documents
+          {t('documents.uploadDocuments')}
         </Button>
       </div>
 
@@ -517,13 +519,13 @@ const Documents = () => {
                   {/* Access Level Badge */}
                   <div className="absolute top-3 right-3">
                     {document.access_level === 'private' && (
-                      <Lock className="w-4 h-4 text-red-500" title="Private" />
+                      <Lock className="w-4 h-4 text-red-500" title={t('documents.private')} />
                     )}
                     {document.access_level === 'shared' && (
-                      <Share2 className="w-4 h-4 text-blue-500" title="Shared" />
+                      <Share2 className="w-4 h-4 text-blue-500" title={t('documents.shared')} />
                     )}
                     {document.access_level === 'restricted' && (
-                      <Unlock className="w-4 h-4 text-yellow-500" title="Restricted" />
+                      <Unlock className="w-4 h-4 text-yellow-500" title={t('documents.restricted')} />
                     )}
                   </div>
 
@@ -570,8 +572,8 @@ const Documents = () => {
 
                     {/* Upload Info */}
                     <div className="text-xs text-gray-500 mb-4">
-                      <p>Uploaded: {new Date(document.upload_date).toLocaleDateString()}</p>
-                      <p>Downloads: {document.download_count}</p>
+                      <p>{t('documents.uploaded')}: {new Date(document.upload_date).toLocaleDateString()}</p>
+                      <p>{t('documents.downloads')}: {document.download_count}</p>
                     </div>
 
                     {/* Actions */}
@@ -579,22 +581,22 @@ const Documents = () => {
                       <button
                         onClick={() => handleDownload(document)}
                         className="flex-1 p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors text-xs"
-                        title="Download"
+                        title={t('common.download')}
                       >
                         <Download className="w-4 h-4 inline mr-1" />
-                        Download
+                        {t('common.download')}
                       </button>
                       <button
                         onClick={() => handleEdit(document)}
                         className="p-2 text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
-                        title="Edit"
+                        title={t('common.edit')}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(document.id)}
                         className="p-2 text-danger-500 hover:bg-danger-50 rounded-lg transition-colors"
-                        title="Delete"
+                        title={t('common.delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -612,14 +614,14 @@ const Documents = () => {
               <table className="w-full">
                 <thead className="border-b">
                   <tr>
-                    <th className="text-left py-3 px-4">Document</th>
-                    <th className="text-left py-3 px-4">Category</th>
-                    <th className="text-left py-3 px-4">Customer</th>
-                    <th className="text-left py-3 px-4">Contract</th>
-                    <th className="text-left py-3 px-4">Size</th>
-                    <th className="text-left py-3 px-4">Upload Date</th>
-                    <th className="text-left py-3 px-4">Access</th>
-                    <th className="text-center py-3 px-4">Actions</th>
+                    <th className="text-left py-3 px-4">{t('documents.document')}</th>
+                    <th className="text-left py-3 px-4">{t('documents.category')}</th>
+                    <th className="text-left py-3 px-4">{t('documents.customer')}</th>
+                    <th className="text-left py-3 px-4">{t('documents.contract')}</th>
+                    <th className="text-left py-3 px-4">{t('documents.size')}</th>
+                    <th className="text-left py-3 px-4">{t('documents.uploadDate')}</th>
+                    <th className="text-left py-3 px-4">{t('documents.access')}</th>
+                    <th className="text-center py-3 px-4">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -674,21 +676,21 @@ const Documents = () => {
                             <button
                               onClick={() => handleDownload(document)}
                               className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Download"
+                              title={t('common.download')}
                             >
                               <Download className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleEdit(document)}
                               className="p-1.5 text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
-                              title="Edit"
+                              title={t('common.edit')}
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(document.id)}
                               className="p-1.5 text-danger-500 hover:bg-danger-50 rounded-lg transition-colors"
-                              title="Delete"
+                              title={t('common.delete')}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -723,7 +725,7 @@ const Documents = () => {
             >
               <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">
-                  {editingDocument ? 'Edit Document' : 'Upload Documents'}
+                  {editingDocument ? t('documents.editDocument') : t('documents.uploadDocuments')}
                 </h2>
                 <button
                   onClick={() => {
@@ -741,40 +743,40 @@ const Documents = () => {
                 <div className="grid grid-cols-2 gap-6">
                   {/* Left Column - Document Info */}
                   <div>
-                    <h3 className="font-semibold mb-4">Document Information</h3>
+                    <h3 className="font-semibold mb-4">{t('documents.documentInformation')}</h3>
                     
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Document Name
+                          {t('documents.documentName')}
                         </label>
                         <input
                           type="text"
                           name="name"
                           value={formData.name}
                           onChange={handleInputChange}
-                          placeholder="Enter document name"
+                          placeholder={t('documents.enterDocumentName')}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Description
+                          {t('documents.description')}
                         </label>
                         <textarea
                           name="description"
                           value={formData.description}
                           onChange={handleInputChange}
                           rows="3"
-                          placeholder="Enter document description"
+                          placeholder={t('documents.enterDocumentDescription')}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Category *
+                          {t('documents.category')} *
                         </label>
                         <select
                           name="category"
@@ -793,7 +795,7 @@ const Documents = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Customer *
+                          {t('documents.customer')} *
                         </label>
                         <select
                           name="customer_id"
@@ -802,7 +804,7 @@ const Documents = () => {
                           required
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="">Select Customer</option>
+                          <option value="">{t('documents.selectCustomer')}</option>
                           {customers.map(customer => (
                             <option key={customer.id} value={customer.id}>
                               {customer.name} - {customer.phone}
@@ -813,7 +815,7 @@ const Documents = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Contract (Optional)
+                          {t('documents.contractOptional')}
                         </label>
                         <select
                           name="contract_id"
@@ -821,7 +823,7 @@ const Documents = () => {
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="">No Contract</option>
+                          <option value="">{t('documents.noContract')}</option>
                           {formData.customer_id && getCustomerContracts(formData.customer_id).map(contract => (
                             <option key={contract.id} value={contract.id}>
                               {contract.contract_number} - {contract.unit_number}
@@ -832,14 +834,14 @@ const Documents = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Tags
+                          {t('documents.tags')}
                         </label>
                         <input
                           type="text"
                           name="tags"
                           value={formData.tags}
                           onChange={handleInputChange}
-                          placeholder="Enter tags separated by commas"
+                          placeholder={t('documents.enterTags')}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                       </div>
@@ -847,7 +849,7 @@ const Documents = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Access Level
+                            {t('documents.accessLevel')}
                           </label>
                           <select
                             name="access_level"
@@ -855,14 +857,14 @@ const Documents = () => {
                             onChange={handleInputChange}
                             className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                           >
-                            <option value="private">Private</option>
-                            <option value="shared">Shared</option>
-                            <option value="restricted">Restricted</option>
+                            <option value="private">{t('documents.private')}</option>
+                            <option value="shared">{t('documents.shared')}</option>
+                            <option value="restricted">{t('documents.restricted')}</option>
                           </select>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Version
+                            {t('documents.version')}
                           </label>
                           <input
                             type="text"
@@ -879,14 +881,14 @@ const Documents = () => {
 
                   {/* Right Column - File Upload */}
                   <div>
-                    <h3 className="font-semibold mb-4">File Upload</h3>
+                    <h3 className="font-semibold mb-4">{t('documents.fileUpload')}</h3>
                     
                     {/* File Upload Area */}
                     <div className="mb-6">
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-300 transition-colors">
                         <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                         <p className="text-lg font-medium text-gray-700 mb-2">
-                          Drop files here or click to upload
+                          {t('documents.dropFilesHere')}
                         </p>
                         <input
                           type="file"
@@ -900,19 +902,19 @@ const Documents = () => {
                           htmlFor="document-upload"
                           className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 cursor-pointer transition-colors"
                         >
-                          Choose Files
+                          {t('documents.chooseFiles')}
                         </label>
                         <p className="text-sm text-gray-500 mt-3">
-                          Supported: PDF, DOC, DOCX, TXT, JPG, PNG, XLS, XLSX
+                          {t('documents.supportedFormats')}
                           <br />
-                          Maximum size: 10MB per file
+                          {t('documents.maximumSize')}
                         </p>
                       </div>
 
                       {/* Selected Files Preview */}
                       {selectedFiles.length > 0 && (
                         <div className="mt-4 space-y-3">
-                          <h4 className="font-medium text-gray-700">Selected Files:</h4>
+                          <h4 className="font-medium text-gray-700">{t('documents.selectedFiles')}:</h4>
                           {selectedFiles.map((file, index) => {
                             const FileIconComponent = getFileIcon(file.type);
                             return (
@@ -928,7 +930,7 @@ const Documents = () => {
                                   type="button"
                                   onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== index))}
                                   className="p-1 text-danger-500 hover:bg-danger-50 rounded"
-                                  title="Remove"
+                                  title={t('common.remove')}
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
@@ -941,13 +943,13 @@ const Documents = () => {
 
                     {/* Upload Instructions */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-medium text-blue-800 mb-2">Upload Guidelines:</h4>
+                      <h4 className="font-medium text-blue-800 mb-2">{t('documents.uploadGuidelines')}:</h4>
                       <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Ensure documents are clearly readable</li>
-                        <li>• Use descriptive filenames</li>
-                        <li>• Select appropriate category and customer</li>
-                        <li>• Add relevant tags for easier searching</li>
-                        <li>• Check access level permissions</li>
+                        <li>• {t('documents.guidelineReadable')}</li>
+                        <li>• {t('documents.guidelineFilenames')}</li>
+                        <li>• {t('documents.guidelineCategory')}</li>
+                        <li>• {t('documents.guidelineTags')}</li>
+                        <li>• {t('documents.guidelinePermissions')}</li>
                       </ul>
                     </div>
                   </div>
@@ -964,7 +966,7 @@ const Documents = () => {
                       setSelectedFiles([]);
                     }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button 
                     type="submit" 
@@ -972,7 +974,7 @@ const Documents = () => {
                     disabled={!editingDocument && selectedFiles.length === 0}
                   >
                     <Save className="w-5 h-5 mr-2" />
-                    {editingDocument ? 'Update Document' : 'Upload Documents'}
+                    {editingDocument ? t('documents.updateDocument') : t('documents.uploadDocuments')}
                   </Button>
                 </div>
               </form>
