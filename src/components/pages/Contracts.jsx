@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../../context/AppContext';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 import {
   Plus,
   Edit2,
@@ -27,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Badge from '../ui/Badge';
 
 const Contracts = () => {
+  const { t } = useTranslation();
   const {
     contracts,
     setContracts,
@@ -64,12 +67,12 @@ const Contracts = () => {
 
   // Contract statuses
   const contractStatuses = {
-    'draft': { label: 'Draft', color: 'warning', icon: Edit2 },
-    'active': { label: 'Active', color: 'success', icon: CheckCircle },
-    'pending': { label: 'Pending Signature', color: 'info', icon: Clock },
-    'expired': { label: 'Expired', color: 'danger', icon: AlertCircle },
-    'terminated': { label: 'Terminated', color: 'default', icon: X },
-    'renewed': { label: 'Renewed', color: 'success', icon: FileCheck }
+    'draft': { label: t('contracts.draft'), color: 'warning', icon: Edit2 },
+    'active': { label: t('contracts.active'), color: 'success', icon: CheckCircle },
+    'pending': { label: t('contracts.pendingSignature'), color: 'info', icon: Clock },
+    'expired': { label: t('contracts.expired'), color: 'danger', icon: AlertCircle },
+    'terminated': { label: t('contracts.terminated'), color: 'default', icon: X },
+    'renewed': { label: t('contracts.renewed'), color: 'success', icon: FileCheck }
   };
 
   // Initialize filtered contracts when contracts change
@@ -129,7 +132,7 @@ const Contracts = () => {
           unit_number: unit.unit_number,
           monthly_rate: unit.monthly_rate,
           security_deposit: unit.monthly_rate, // Default to same as monthly rate
-          terms: `Standard rental agreement for storage unit ${unit.unit_number} (${unit.size} ft)`
+          terms: t('contracts.standardAgreement', { unitNumber: unit.unit_number, size: unit.size })
         }));
       }
     }
@@ -235,7 +238,7 @@ const Contracts = () => {
 
   // Delete contract
   const handleDelete = (contractId) => {
-    if (window.confirm('Are you sure you want to delete this contract? This action cannot be undone.')) {
+    if (window.confirm(t('contracts.confirmDelete'))) {
       setContracts(prev => prev.filter(contract => contract.id !== contractId));
     }
   };
@@ -263,8 +266,8 @@ const Contracts = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold gradient-text mb-2">Contracts</h1>
-        <p className="text-gray-600">Manage rental contracts and customer agreements</p>
+        <h1 className="text-4xl font-bold gradient-text mb-2">{t('contracts.title')}</h1>
+        <p className="text-gray-600">{t('contracts.subtitle')}</p>
       </div>
 
       {/* Statistics */}
@@ -272,43 +275,43 @@ const Contracts = () => {
         <Card className="text-center">
           <FileText className="w-8 h-8 mx-auto mb-2 text-primary-500" />
           <p className="text-2xl font-bold">{stats.total}</p>
-          <p className="text-xs text-gray-600">Total Contracts</p>
+          <p className="text-xs text-gray-600">{t('contracts.totalContracts')}</p>
         </Card>
 
         <Card className="text-center">
           <CheckCircle className="w-8 h-8 mx-auto mb-2 text-success-500" />
           <p className="text-2xl font-bold">{stats.active}</p>
-          <p className="text-xs text-gray-600">Active</p>
+          <p className="text-xs text-gray-600">{t('contracts.active')}</p>
         </Card>
 
         <Card className="text-center">
           <Clock className="w-8 h-8 mx-auto mb-2 text-info-500" />
           <p className="text-2xl font-bold">{stats.pending}</p>
-          <p className="text-xs text-gray-600">Pending</p>
+          <p className="text-xs text-gray-600">{t('contracts.pending')}</p>
         </Card>
 
         <Card className="text-center">
           <Edit2 className="w-8 h-8 mx-auto mb-2 text-warning-500" />
           <p className="text-2xl font-bold">{stats.draft}</p>
-          <p className="text-xs text-gray-600">Draft</p>
+          <p className="text-xs text-gray-600">{t('contracts.draft')}</p>
         </Card>
 
         <Card className="text-center">
           <AlertCircle className="w-8 h-8 mx-auto mb-2 text-danger-500" />
           <p className="text-2xl font-bold">{stats.expired}</p>
-          <p className="text-xs text-gray-600">Expired</p>
+          <p className="text-xs text-gray-600">{t('contracts.expired')}</p>
         </Card>
 
         <Card className="text-center">
           <Calendar className="w-8 h-8 mx-auto mb-2 text-orange-500" />
           <p className="text-2xl font-bold">{stats.expiringThisMonth}</p>
-          <p className="text-xs text-gray-600">Expiring Soon</p>
+          <p className="text-xs text-gray-600">{t('contracts.expiringSoon')}</p>
         </Card>
 
         <Card className="text-center">
-          <div className="w-8 h-8 mx-auto mb-2 flex items-center justify-center text-success-600 font-bold text-lg">$</div>
-          <p className="text-2xl font-bold">${stats.totalValue}</p>
-          <p className="text-xs text-gray-600">Monthly Value</p>
+          <div className="w-8 h-8 mx-auto mb-2 flex items-center justify-center text-success-600 font-bold text-lg">{getCurrencySymbol()}</div>
+          <p className="text-2xl font-bold">{formatCurrency(stats.totalValue)}</p>
+          <p className="text-xs text-gray-600">{t('contracts.monthlyValue')}</p>
         </Card>
       </div>
 
@@ -320,7 +323,7 @@ const Contracts = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search contracts..."
+              placeholder={t('contracts.searchContracts')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-64 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -333,7 +336,7 @@ const Contracts = () => {
             onChange={(e) => setSelectedCustomer(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Customers</option>
+            <option value="all">{t('contracts.allCustomers')}</option>
             {customers.map(customer => (
               <option key={customer.id} value={customer.id}>
                 {customer.name}
@@ -347,7 +350,7 @@ const Contracts = () => {
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="all">All Status</option>
+            <option value="all">{t('contracts.allStatus')}</option>
             {Object.entries(contractStatuses).map(([key, status]) => (
               <option key={key} value={key}>
                 {status.label}
@@ -362,28 +365,28 @@ const Contracts = () => {
           onClick={() => setShowAddModal(true)}
         >
           <Plus className="w-5 h-5 mr-2" />
-          New Contract
+          {t('contracts.newContract')}
         </Button>
       </div>
 
       {/* Contracts Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Contract Management</CardTitle>
+          <CardTitle>{t('contracts.contractManagement')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contract #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Files</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contracts.contractNumber')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contracts.customer')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contracts.unit')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contracts.period')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contracts.rate')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.status')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('contracts.files')}</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -414,7 +417,7 @@ const Contracts = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-gray-900">${contract.monthly_rate}/mo</span>
+                      <span className="text-sm font-semibold text-gray-900">{formatCurrency(contract.monthly_rate)}/{t('common.month')}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant={contractStatuses[contract.status]?.color || 'default'}>
@@ -427,7 +430,7 @@ const Contracts = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
                         <Paperclip className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">{contract.files?.length || 0} files</span>
+                        <span className="text-sm text-gray-600">{contract.files?.length || 0} {t('contracts.files')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -435,14 +438,14 @@ const Contracts = () => {
                         <button
                           onClick={() => handleEdit(contract)}
                           className="p-1.5 text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
-                          title="Edit Contract"
+                          title={t('contracts.editContract')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(contract.id)}
                           className="p-1.5 text-danger-500 hover:bg-danger-50 rounded-lg transition-colors"
-                          title="Delete Contract"
+                          title={t('contracts.deleteContract')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -475,7 +478,7 @@ const Contracts = () => {
             >
               <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">
-                  {editingContract ? 'Edit Contract' : 'New Contract'}
+                  {editingContract ? t('contracts.editContract') : t('contracts.newContract')}
                 </h2>
                 <button
                   onClick={() => {
@@ -492,12 +495,12 @@ const Contracts = () => {
                 <div className="grid grid-cols-2 gap-6">
                   {/* Left Column - Contract Info */}
                   <div>
-                    <h3 className="font-semibold mb-4">Contract Information</h3>
+                    <h3 className="font-semibold mb-4">{t('contracts.contractInformation')}</h3>
                     
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Customer *
+                          {t('contracts.customer')} *
                         </label>
                         <select
                           name="customer_id"
@@ -506,7 +509,7 @@ const Contracts = () => {
                           required
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="">Select Customer</option>
+                          <option value="">{t('contracts.selectCustomer')}</option>
                           {customers.map(customer => (
                             <option key={customer.id} value={customer.id}>
                               {customer.name} - {customer.phone}
@@ -517,7 +520,7 @@ const Contracts = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Contract Number *
+                          {t('contracts.contractNumber')} *
                         </label>
                         <input
                           type="text"
@@ -525,14 +528,14 @@ const Contracts = () => {
                           value={formData.contract_number}
                           onChange={handleInputChange}
                           required
-                          placeholder="e.g., CNT-2024-001"
+                          placeholder={t('contracts.contractNumberPlaceholder')}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Select Unit *
+                          {t('contracts.selectUnit')} *
                         </label>
                         <select
                           name="unit_id"
@@ -541,10 +544,10 @@ const Contracts = () => {
                           required
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="">Select a unit</option>
+                          <option value="">{t('contracts.selectAUnit')}</option>
                           {getAvailableUnits().map(unit => (
                             <option key={unit.id} value={unit.id}>
-                              {unit.unit_number} - {unit.size} ft - ${unit.monthly_rate}/mo (Floor {unit.floor})
+                              {unit.unit_number} - {unit.size} {t('common.ft')} - {formatCurrency(unit.monthly_rate)}/{t('common.month')} ({t('units.floor')} {unit.floor})
                             </option>
                           ))}
                         </select>
@@ -552,7 +555,7 @@ const Contracts = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Unit Number *
+                          {t('units.unitNumber')} *
                         </label>
                         <input
                           type="text"
@@ -561,14 +564,14 @@ const Contracts = () => {
                           onChange={handleInputChange}
                           required
                           readOnly
-                          placeholder="Auto-filled from unit selection"
+                          placeholder={t('contracts.autoFilledFromUnit')}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50"
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Contract Type
+                          {t('contracts.contractType')}
                         </label>
                         <select
                           name="contract_type"
@@ -576,17 +579,17 @@ const Contracts = () => {
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
-                          <option value="rental">Rental Agreement</option>
-                          <option value="lease">Lease Agreement</option>
-                          <option value="month-to-month">Month-to-Month</option>
-                          <option value="annual">Annual Contract</option>
+                          <option value="rental">{t('contracts.rentalAgreement')}</option>
+                          <option value="lease">{t('contracts.leaseAgreement')}</option>
+                          <option value="month-to-month">{t('contracts.monthToMonth')}</option>
+                          <option value="annual">{t('contracts.annualContract')}</option>
                         </select>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Start Date *
+                            {t('contracts.startDate')} *
                           </label>
                           <input
                             type="date"
@@ -599,7 +602,7 @@ const Contracts = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            End Date *
+                            {t('contracts.endDate')} *
                           </label>
                           <input
                             type="date"
@@ -615,7 +618,7 @@ const Contracts = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Monthly Rate ($) *
+                            {t('contracts.monthlyRate')} ({getCurrencySymbol()}) *
                           </label>
                           <input
                             type="number"
@@ -630,7 +633,7 @@ const Contracts = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Security Deposit ($)
+                            {t('contracts.securityDeposit')} ({getCurrencySymbol()})
                           </label>
                           <input
                             type="number"
@@ -646,7 +649,7 @@ const Contracts = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Status
+                          {t('common.status')}
                         </label>
                         <select
                           name="status"
@@ -671,7 +674,7 @@ const Contracts = () => {
                             onChange={handleInputChange}
                             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <span className="text-sm font-medium text-gray-700">Auto-renewal enabled</span>
+                          <span className="text-sm font-medium text-gray-700">{t('contracts.autoRenewEnabled')}</span>
                         </label>
                       </div>
                     </div>
@@ -679,19 +682,19 @@ const Contracts = () => {
 
                   {/* Right Column - Files & Terms */}
                   <div>
-                    <h3 className="font-semibold mb-4">Files & Documentation</h3>
+                    <h3 className="font-semibold mb-4">{t('contracts.filesDocumentation')}</h3>
                     
                     {/* File Upload Section */}
                     <div className="mb-6">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Contract Files
+                        {t('contracts.contractFiles')}
                       </label>
                       
                       {/* Upload Area */}
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-300 transition-colors">
                         <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
                         <p className="text-sm text-gray-600 mb-2">
-                          Drop files here or click to upload
+                          {t('contracts.dropFilesHere')}
                         </p>
                         <input
                           type="file"
@@ -705,17 +708,17 @@ const Contracts = () => {
                           htmlFor="file-upload"
                           className="inline-block px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 cursor-pointer transition-colors"
                         >
-                          Choose Files
+                          {t('contracts.chooseFiles')}
                         </label>
                         <p className="text-xs text-gray-500 mt-2">
-                          PDF, DOC, DOCX, TXT, JPG, PNG up to 10MB each
+                          {t('contracts.fileTypes')}
                         </p>
                       </div>
 
                       {/* Uploaded Files List */}
                       {formData.files && formData.files.length > 0 && (
                         <div className="mt-4 space-y-2">
-                          <h4 className="text-sm font-medium text-gray-700">Attached Files:</h4>
+                          <h4 className="text-sm font-medium text-gray-700">{t('contracts.attachedFiles')}:</h4>
                           {formData.files.map((file) => (
                             <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                               <div className="flex items-center space-x-3">
@@ -729,7 +732,7 @@ const Contracts = () => {
                                 <button
                                   type="button"
                                   className="p-1 text-primary-500 hover:bg-primary-50 rounded"
-                                  title="Download"
+                                  title={t('common.download')}
                                 >
                                   <Download className="w-4 h-4" />
                                 </button>
@@ -737,7 +740,7 @@ const Contracts = () => {
                                   type="button"
                                   onClick={() => removeFile(file.id)}
                                   className="p-1 text-danger-500 hover:bg-danger-50 rounded"
-                                  title="Remove"
+                                  title={t('common.remove')}
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
@@ -752,7 +755,7 @@ const Contracts = () => {
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Contract Terms
+                          {t('contracts.contractTerms')}
                         </label>
                         <textarea
                           name="terms"
@@ -760,13 +763,13 @@ const Contracts = () => {
                           onChange={handleInputChange}
                           rows="4"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="Enter contract terms and conditions..."
+                          placeholder={t('contracts.enterContractTerms')}
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Notes
+                          {t('common.notes')}
                         </label>
                         <textarea
                           name="notes"
@@ -774,7 +777,7 @@ const Contracts = () => {
                           onChange={handleInputChange}
                           rows="3"
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          placeholder="Additional notes or comments..."
+                          placeholder={t('contracts.additionalNotes')}
                         />
                       </div>
                     </div>
@@ -791,11 +794,11 @@ const Contracts = () => {
                       setEditingContract(null);
                     }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" variant="gradient">
                     <Save className="w-5 h-5 mr-2" />
-                    {editingContract ? 'Update Contract' : 'Create Contract'}
+                    {editingContract ? t('contracts.updateContract') : t('contracts.createContract')}
                   </Button>
                 </div>
               </form>
